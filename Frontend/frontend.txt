@@ -1,1 +1,0 @@
-If possible use tailwind, it's quick af
