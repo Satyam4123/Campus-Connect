@@ -9,7 +9,7 @@ const protect=async (req,res,next)=>{
     const token=authorization.split(" ")[1];
     try {
         const {id}=jwt.verify(token, process.env.JWT_SECRET)
-        req.user=await users.findOne({_id:id}).select("_id")
+        req.user=await users.findOne({_id:id}).select("_id name")
         
         if (!req.user) {
             return res.status(401).json({error:"User not found"})

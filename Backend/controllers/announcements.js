@@ -20,6 +20,7 @@ const addAnnouncement=async (req,res)=>{
         await newAnnouncement.save()
         return res.status(201).json({message:"Announcement added successfully", newAnnouncement})
     } catch (error) {
+        console.log(error)
         return res.status(500).json({message:"Internal Server error"})
     }
 }
