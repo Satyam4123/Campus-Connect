@@ -6,6 +6,7 @@ const profileRoute=require('../routes/profileRoute')
 const announcements=require('../routes/announcementsRoute')
 const searchRoute=require('../routes/searchRoute')
 const eventRoute=require('../routes/eventRoute')
+const resourcesRoutes=require('../routes/resourcesRoutes')
 
 const port=process.env.PORT;
 const app=express()
@@ -15,6 +16,7 @@ app.use('/profile',profileRoute)
 app.use('/announcements',announcements)
 app.use('/search',searchRoute)
 app.use('/events',eventRoute)
+app.use('/resources',resourcesRoutes)
 app.get('/',(req,res)=>{
     res.send("HELLO")
 })
