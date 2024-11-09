@@ -1,0 +1,44 @@
+.Navbar{
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.Navbar .SIlogo{
+    width:220px;
+    
+}
+.Navbar .navbar-menu{
+    display:flex;
+    list-style: none;
+    gap:25px;
+    color:#49557e;
+    font-size:18px;
+}
+.navbar-right{
+    display:flex;
+    align-items:center;
+    gap:25px;
+
+}
+.navbar-right button{
+    background:transparent;
+    font-size:16px;
+    padding:10px 30px;
+    color:#49557e;
+    border-radius: 50px;
+    border:1px solid rgb(43, 39, 39);
+    cursor:pointer;
+    transition:0.5s;
+}
+.navbar-right button:hover{
+    background-color:#26272b;
+    color:white;
+}
+.Navbar .active{
+    padding-bottom:2px;
+    border-bottom:2px solid black;
+    
+}
+.Navbar li{
+    cursor:pointer
+}
