@@ -17,6 +17,7 @@ app.use('/announcements',announcements)
 app.use('/search',searchRoute)
 app.use('/events',eventRoute)
 app.use('/resources',resourcesRoutes)
+
 app.get('/',(req,res)=>{
     res.send("HELLO")
 })
