@@ -7,9 +7,9 @@ const router=require('express').Router();
 router.get('/:id',protect,getProfile)
 
 // To edit profile
-router.put('/:id/edit',protect,editProfile)
+router.put('/edit',protect,editProfile)
 
 // To delete profile
-router.delete('/:id/delete',protect,deleteProfile)
+router.delete('/delete',protect,deleteProfile)
 
 module.exports=router
