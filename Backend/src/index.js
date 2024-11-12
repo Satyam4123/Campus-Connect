@@ -8,6 +8,7 @@ const announcements=require('../routes/announcementsRoute')
 const searchRoute=require('../routes/searchRoute')
 const eventRoute=require('../routes/eventRoute')
 const resourcesRoutes=require('../routes/resourcesRoutes');
+const voiceInteration=require('../routes/voiceInteraction')
 const session=require('express-session')
 const cors=require('cors')
 const port=process.env.PORT;
@@ -37,6 +38,7 @@ app.use('/announcements',announcements)
 app.use('/search',searchRoute)
 app.use('/events',eventRoute)
 app.use('/resources',resourcesRoutes)
+app.use('/voice',voiceInteration)
 
 app.listen(port, ()=>{
     console.log(`Your app is listening at port ${port}`)
