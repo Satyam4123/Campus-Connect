@@ -15,25 +15,30 @@ const LoginPopup = ({ setShowLogin }) => {
 
     // Handle form submission
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError(""); // Clear previous errors
+     e.preventDefault();
+     setError(""); // Clear previous errors
 
-        try {
-            if (currState === "Sign Up") {
-                // Sign-up request
-                await axios.post("http://localhost:3000/auth/signup", { name, email, password });
-                alert("Account created successfully! Please log in.");
-                setcurrState("Login"); // Switch to login after signup
-            } else {
-                // Login request
-                await axios.post("http://localhost:3000/auth/login", { email, password });
-                alert("Login successful!");
-                setShowLogin(false); // Close the login popup on success
-            }
-        } catch (error) {
-            setError("Failed to " + currState.toLowerCase() + ": " + (error.response?.data?.message || error.message));
-        }
-    };
+     try {
+         if (currState === "Sign Up") {
+             // Sign-up request
+             await axios.post("http://localhost:3000/auth/signup", { name, email, password, department, year });
+             alert("Account created successfully! Please log in.");
+             setcurrState("Login"); // Switch to login after signup
+         } else {
+             // Login request
+             const response = await axios.post("http://localhost:3000/auth/login", { email, password });
+             alert("Login successful!");
+
+             // Store the token received after login
+             localStorage.setItem("token", response.data.jwtToken);  // Ensure the token is in the response
+
+             setShowLogin(false); // Close the login popup on success
+         }
+     } catch (error) {
+         setError("Failed to " + currState.toLowerCase() + ": " + (error.response?.data?.message || error.message));
+     }
+ };
+
 
     return (
         <div className='login-popup'>

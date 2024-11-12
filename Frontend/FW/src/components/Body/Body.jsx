@@ -80,7 +80,7 @@ function AnnouncementsFeed() {
   const [error, setError] = useState("");
 
   // Get the token from localStorage or another source where it's stored
-  const token = localStorage.getItem('authToken');  // Ensure you're using 'authToken' (check the naming consistency)
+  const token = localStorage.getItem('token');  // Ensure you're using 'authToken' (check the naming consistency)
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
