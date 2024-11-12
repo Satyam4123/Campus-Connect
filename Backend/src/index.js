@@ -9,9 +9,15 @@ const searchRoute=require('../routes/searchRoute')
 const eventRoute=require('../routes/eventRoute')
 const resourcesRoutes=require('../routes/resourcesRoutes');
 const session=require('express-session')
-
+const cors=require('cors')
 const port=process.env.PORT;
 const app=express()
+app.use(
+  cors({
+    origin: "http://localhost:5173", 
+    credentials: true,
+  })
+);
 app.use(express.json())
 app.use(
     session({
