@@ -3,6 +3,7 @@ import axios from 'axios';
 import './LoginPopup.css';
 import { assets } from '../../assets/assets';
 
+
 const LoginPopup = ({ setShowLogin }) => {
     const [currState, setcurrState] = useState("Sign Up");
     const [name, setName] = useState("");

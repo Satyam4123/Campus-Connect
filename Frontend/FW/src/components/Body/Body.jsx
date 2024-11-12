@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, TextField, Avatar, Card, CardContent, CardHeader, Typography } from '@mui/material';
 import { CalendarToday, Home, Message, Search, Person } from '@mui/icons-material'; // Material icons
 import './Body.css';
+import axios from 'axios';
 
 export default function Body() {
   const [activeTab, setActiveTab] = useState('home');
@@ -44,11 +45,10 @@ export default function Body() {
         <header className="main-header">
           <div className="search-container">
             <Search className="search-icon" />
-            <TextField variant="outlined"  className="search-input" size="small" />
+            <TextField variant="outlined" className="search-input" size="small" />
           </div>
           <div className="header-icons">
             <Button variant="text">
-              
             </Button>
             <Avatar alt="User Avatar" src="https://github.com/shadcn.png" />
           </div>
@@ -76,26 +76,61 @@ function NavItem({ icon, label, active, onClick }) {
 }
 
 function AnnouncementsFeed() {
-  const announcements = [
-    { id: 1, title: "Campus Cleanup Drive", content: "Join us this Saturday for a campus-wide cleanup initiative.", date: "2024-03-15" },
-    { id: 2, title: "New Library Hours", content: "The central library will now be open 24/7 during exam weeks.", date: "2024-03-14" },
-    { id: 3, title: "Guest Lecture Series", content: "Don't miss our upcoming guest lecture on AI and its applications in modern engineering.", date: "2024-03-13" },
-  ];
+  const [announcements, setAnnouncements] = useState([]);
+  const [error, setError] = useState("");
+
+  // Get the token from localStorage or another source where it's stored
+  const token = localStorage.getItem('authToken');  // Ensure you're using 'authToken' (check the naming consistency)
+
+  useEffect(() => {
+    const fetchAnnouncements = async () => {
+      try {
+        if (!token) {
+          setError("You are not authorized. Please log in.");
+          return;
+        }
+
+        const response = await axios.get("http://localhost:3000/announcements", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Send the token in the Authorization header
+          },
+        });
+
+        if (response.status === 200) {
+          setAnnouncements(response.data); // Assuming the server returns the announcements data
+        } else {
+          setError("Failed to fetch announcements.");
+        }
+      } catch (err) {
+        setError("Failed to fetch announcements: " + (err.response?.data?.message || err.message));
+      }
+    };
+
+    fetchAnnouncements();
+  }, [token]);
+
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
     <div className="announcements">
       <h2 className="announcements-title">Announcements</h2>
-      {announcements.map((announcement) => (
-        <Card key={announcement.id} className="announcement-card">
-          <CardHeader>
-            <Typography variant="h6">{announcement.title}</Typography>
-            <Typography variant="body2" color="textSecondary">{announcement.date}</Typography>
-          </CardHeader>
-          <CardContent>
-            <Typography variant="body1">{announcement.content}</Typography>
-          </CardContent>
-        </Card>
-      ))}
+      {announcements.length > 0 ? (
+        announcements.map((announcement) => (
+          <Card key={announcement.id} className="announcement-card">
+            <CardHeader>
+              <Typography variant="h6">{announcement.title}</Typography>
+              <Typography variant="body2" color="textSecondary">{announcement.date}</Typography>
+            </CardHeader>
+            <CardContent>
+              <Typography variant="body1">{announcement.content}</Typography>
+            </CardContent>
+          </Card>
+        ))
+      ) : (
+        <p>No announcements available</p>
+      )}
     </div>
   );
 }
