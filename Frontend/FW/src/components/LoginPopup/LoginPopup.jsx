@@ -31,6 +31,7 @@ const LoginPopup = ({ setShowLogin }) => {
 
              // Store the token received after login
              localStorage.setItem("token", response.data.jwtToken);  // Ensure the token is in the response
+             localStorage.setItem("userId", response.data.userId);  // Ensure the token is in the response
 
              setShowLogin(false); // Close the login popup on success
          }
