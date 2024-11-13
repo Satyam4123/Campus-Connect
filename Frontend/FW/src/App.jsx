@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import Navbar from './components/Navbar/navbar'
-import Main from './components/Main/Main'
+import React, { useState } from 'react';
+import Navbar from './components/Navbar/navbar';
+import Main from './components/Main/Main';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Footer from './components/Footer/Footer';
 import AppDownload from './components/AppDownload/AppDownload';
@@ -27,7 +27,7 @@ const App = () => {
         </Routes> 
       </div>
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;

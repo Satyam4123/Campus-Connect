@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, Calendar, ChevronLeft, ChevronRight, Eye, FileText, Folder, Home, MessageCircle, Plus, Search, Trash, User, X, Edit3 } from 'lucide-react';
 import './Body.css';
+import axios from 'axios';
 
 export default function SmartCampusConnect() {
   const [searchQuery, setSearchQuery] = useState('');

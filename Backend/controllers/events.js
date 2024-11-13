@@ -1,4 +1,5 @@
 const Events = require("../models/eventsNcalendar");
+const userActivities = require("../models/userActivities");
 
 const createEvent=async (req,res) => {
     const {eventName, description,date,time,location}=req.body;
@@ -11,6 +12,12 @@ const createEvent=async (req,res) => {
             location
         })
         await newEvent.save();
+        await userActivities.create({
+          userId: req.user._id,
+          action:"marked",
+          resourceId: newEvent._id,
+          timestamp: Date.now(),
+        });
         return res.status(200).json({message:"Event created successfully", newEvent})
     } catch (error) {
         return res.status(500).json({message:"Internal Server error",error})

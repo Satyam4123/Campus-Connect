@@ -34,10 +34,13 @@ const login=async(req,res)=>{
             message:"Login successful",
             name:user.name,
             email:user.email,
-            jwtToken
+            jwtToken,
+            userId:user._id
         })
     } catch (error) {
         res.status(500).json("Internal server error")
     }
 }
+
+
 module.exports={login,signup}
