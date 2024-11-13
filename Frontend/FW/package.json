@@ -15,12 +15,19 @@
     "@heroicons/react": "^2.1.5",
     "@mui/icons-material": "^6.1.6",
     "@mui/material": "^6.1.6",
+    "@shadcn/ui": "^0.0.4",
     "bootstrap": "^5.3.3",
+    "date-fns": "^4.1.0",
+    "gsap": "^3.12.5",
+    "lucide-react": "^0.456.0",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.5",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.27.0",
-    "shadcn-ui": "^0.9.2"
+    "shadcn-ui": "^0.9.2",
+    "snapsvg": "^0.5.1",
+    "snapsvg-cjs": "^0.0.6",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",

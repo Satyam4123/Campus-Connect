@@ -1,117 +1,331 @@
-import React, { useState } from 'react';
-import { Button, TextField, Avatar, Card, CardContent, CardHeader, Typography } from '@mui/material';
-import { CalendarToday, Home, Message, Search, Person } from '@mui/icons-material'; // Material icons
+import React, { useState, useEffect } from 'react';
+import { Bell, Calendar, ChevronLeft, ChevronRight, Eye, FileText, Folder, Home, MessageCircle, Plus, Search, Trash, User, X, Edit3 } from 'lucide-react';
 import './Body.css';
 
-export default function Body() {
-  const [activeTab, setActiveTab] = useState('home');
+export default function SmartCampusConnect() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeSection, setActiveSection] = useState('home');
+  const [notifications, setNotifications] = useState([]);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [resources, setResources] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
+  const [editAnnouncementId, setEditAnnouncementId] = useState(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [events, setEvents] = useState({});
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'home':
-        return <AnnouncementsFeed />;
-      case 'events':
-        return <EventsCalendar />;
-      case 'messages':
-        return <MessagingSystem />;
-      case 'resources':
-        return <ResourceSharing />;
-      case 'profile':
-        return <UserProfile />;
-      default:
-        return <AnnouncementsFeed />;
+  
+
+  const addResource = (type) => {
+    const newResource = {
+      id: Date.now(),
+      name: type === 'folder' ? 'New Folder' : 'New File',
+      type,
+      addedBy: 'Current User', // In a real app, this would be the logged-in user
+      dateAdded: new Date()
+    };
+    setResources([...resources, newResource]);
+  };
+
+  const deleteResource = (id) => {
+    setResources(resources.filter(resource => resource.id !== id));
+  };
+
+  const viewResource = (resource) => {
+    alert(`Viewing ${resource.type}: ${resource.name}`);
+    // In a real app, this would open the file or show folder contents
+  };
+
+  const handleSectionClick = (section) => {
+    setActiveSection(section);
+    // Show sliding window popup
+    alert(`To be implemented: ${section}`);
+  };
+
+  const handleNotificationClick = () => {
+    setShowNotifications(!showNotifications);
+    if (unreadNotifications > 0) {
+      setUnreadNotifications(0);
+      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
     }
   };
 
-  return (
-    <div className="app-container">
-      {/* Sidebar */}
-      <nav className="sidebar">
-        <div className="sidebar-header">
-          <h1 className="sidebar-title">Smart Campus Connect</h1>
-        </div>
-        <ul className="sidebar-nav">
-          <NavItem icon={<Home />} label="Home" active={activeTab === 'home'} onClick={() => setActiveTab('home')} />
-          <NavItem icon={<CalendarToday />} label="Events" active={activeTab === 'events'} onClick={() => setActiveTab('events')} />
-          <NavItem icon={<Message />} label="Messages" active={activeTab === 'messages'} onClick={() => setActiveTab('messages')} />
-          <NavItem icon={<Person />} label="Resources" active={activeTab === 'resources'} onClick={() => setActiveTab('resources')} />
-          <NavItem icon={<Person />} label="Profile" active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} />
-        </ul>
-      </nav>
+  const addAnnouncement = () => {
+    const newAnnouncement = {
+      id: Date.now(),
+      content: 'New Announcement'
+    };
+    setAnnouncements([...announcements, newAnnouncement]);
+  };
 
-      {/* Main content */}
-      <main className="main-content">
-        <header className="main-header">
+  const deleteAnnouncement = (id) => {
+    setAnnouncements(announcements.filter(announcement => announcement.id !== id));
+  };
+
+  const editAnnouncement = (id, newContent) => {
+    setAnnouncements(
+      announcements.map(announcement =>
+        announcement.id === id ? { ...announcement, content: newContent } : announcement
+      )
+    );
+  };
+
+  const toggleEditAnnouncement = (id) => {
+    setEditAnnouncementId(editAnnouncementId === id ? null : id);
+  };
+
+  const addEvent = (date) => {
+    const eventContent = prompt('Enter event details:');
+    if (eventContent) {
+      setEvents({
+        ...events,
+        [date.toDateString()]: eventContent
+      });
+    }
+  };
+
+  const renderCalendar = () => {
+    const daysInMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0
+    ).getDate();
+    const days = [];
+
+    for (let i = 1; i <= daysInMonth; i++) {
+      const currentDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+      const eventExists = events[currentDay.toDateString()];
+
+      days.push(
+        <div
+          key={i}
+          className={`calendar-day ${eventExists ? 'event-day' : ''}`}
+          onClick={() => addEvent(currentDay)}
+        >
+          <span className="day-number">{i}</span>
+          {eventExists && <Eye className="view-event-icon" onClick={(e) => {
+            e.stopPropagation();
+            alert(events[currentDay.toDateString()]);
+          }} />}
+          <Plus className="add-event-icon" onClick={(e) => {
+            e.stopPropagation();
+            addEvent(currentDay);
+          }} />
+        </div>
+      );
+    }
+    return days;
+  };
+
+  return (
+    <div className="smart-campus-connect">
+      <nav className="navbar">
+        <h1 className="app-title">SMART CAMPUS CONNECT</h1>
+        <div className="nav-actions">
           <div className="search-container">
             <Search className="search-icon" />
-            <TextField variant="outlined"  className="search-input" size="small" />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
           </div>
-          <div className="header-icons">
-            <Button variant="text">
-              
-            </Button>
-            <Avatar alt="User Avatar" src="https://github.com/shadcn.png" />
-          </div>
-        </header>
-        {renderContent()}
-      </main>
+          <button 
+            className="notification-button"
+            onClick={handleNotificationClick}
+          >
+            <Bell />
+            {unreadNotifications > 0 && (
+              <span className="notification-indicator" />
+            )}
+          </button>
+          {showNotifications && (
+            <div className="notifications-dropdown">
+              <div className="notifications-header">
+                <h3>Notifications</h3>
+                <X 
+                  className="close-icon" 
+                  onClick={() => setShowNotifications(false)}
+                />
+              </div>
+              {notifications.map(notification => (
+                <div 
+                  key={notification.id}
+                  className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
+                >
+                  {notification.content}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </nav>
+
+      <div className="main-content">
+        <aside className="sidebar">
+          <button 
+            className="sidebar-button" 
+            onClick={() => handleSectionClick('home')}
+          >
+            <Home className="sidebar-icon" />
+            <span>Home</span>
+            <Plus 
+              className="add-icon" 
+              onClick={(e) => {
+                e.stopPropagation();
+                addAnnouncement();
+              }}
+            />
+          </button>
+          <button 
+            className="sidebar-button"
+            onClick={() => handleSectionClick('calendar')}
+          >
+            <Calendar className="sidebar-icon" />
+            <span>Calendar</span>
+          </button>
+          <button 
+            className="sidebar-button"
+            onClick={() => handleSectionClick('resources')}
+          >
+            <FileText className="sidebar-icon" />
+            <span>Resources</span>
+          </button>
+          <button 
+            className="sidebar-button"
+            onClick={() => handleSectionClick('messages')}
+          >
+            <MessageCircle className="sidebar-icon" />
+            <span>Messages</span>
+          </button>
+        </aside>
+
+        <main className="content-area">
+          {activeSection === 'home' && (
+            <section className="announcements-section">
+              <h2>Announcements</h2>
+              {announcements.map(announcement => (
+                <div key={announcement.id} className="announcement-item">
+                  {editAnnouncementId === announcement.id ? (
+                    <input
+                      type="text"
+                      value={announcement.content}
+                      onChange={(e) => editAnnouncement(announcement.id, e.target.value)}
+                      onBlur={() => setEditAnnouncementId(null)}
+                    />
+                  ) : (
+                    <span>{announcement.content}</span>
+                  )}
+                  <div className="announcement-actions">
+                    <Edit3
+                      className="action-icon"
+                      onClick={() => toggleEditAnnouncement(announcement.id)}
+                    />
+                    <Trash
+                      className="action-icon"
+                      onClick={() => deleteAnnouncement(announcement.id)}
+                    />
+                  </div>
+                </div>
+              ))}
+            </section>
+          )}
+
+          {activeSection === 'calendar' && (
+            <section className="calendar-section">
+              <div className="calendar-header">
+                <button 
+                  className="calendar-nav-button"
+                  onClick={() => setCurrentDate(new Date(
+                    currentDate.getFullYear(),
+                    currentDate.getMonth() - 1
+                  ))}
+                >
+                  <ChevronLeft />
+                </button>
+                <h2>
+                  {currentDate.toLocaleString('default', { 
+                    month: 'long', 
+                    year: 'numeric' 
+                  })}
+                </h2>
+                <button 
+                  className="calendar-nav-button"
+                  onClick={() => setCurrentDate(new Date(
+                    currentDate.getFullYear(),
+                    currentDate.getMonth() + 1
+                  ))}
+                >
+                  <ChevronRight />
+                </button>
+              </div>
+              <div className="calendar-grid">
+                <div className="weekday">Sun</div>
+                <div className="weekday">Mon</div>
+                <div className="weekday">Tue</div>
+                <div className="weekday">Wed</div>
+                <div className="weekday">Thu</div>
+                <div className="weekday">Fri</div>
+                <div className="weekday">Sat</div>
+                {renderCalendar()}
+              </div>
+            </section>
+          )}
+
+          {activeSection === 'resources' && (
+            <section className="resources-section">
+              <h2>Resources</h2>
+              <div className="resources-actions">
+                <button className="action-button" onClick={() => addResource('file')}>
+                  <Plus className="button-icon" />
+                  Add File
+                </button>
+                <button className="action-button" onClick={() => addResource('folder')}>
+                  <Folder className="button-icon" />
+                  Add Folder
+                </button>
+              </div>
+              <div className="resources-list">
+                {resources.map(resource => (
+                  <div key={resource.id} className="resource-item">
+                    <div className="resource-info">
+                      {resource.type === 'folder' ? (
+                        <Folder className="resource-icon" />
+                      ) : (
+                        <FileText className="resource-icon" />
+                      )}
+                      <div>
+                        <p className="resource-name">{resource.name}</p>
+                        <p className="resource-uploader">
+                          <User className="resource-uploader-icon" />
+                          Added by {resource.addedBy}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="resource-actions">
+                      <button className="icon-button" onClick={() => viewResource(resource)}>
+                        <Eye className="action-icon" />
+                      </button>
+                      <button className="icon-button" onClick={() => deleteResource(resource.id)}>
+                        <Trash className="action-icon" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {activeSection === 'messages' && (
+            <section className="messages-section">
+              <h2>Messages</h2>
+              <p>To be implemented: Messaging System</p>
+            </section>
+          )}
+        </main>
+      </div>
     </div>
   );
-}
-
-function NavItem({ icon, label, active, onClick }) {
-  return (
-    <li>
-      <Button
-        variant={active ? "contained" : "text"}
-        className={`nav-item ${active ? "active" : ""}`}
-        onClick={onClick}
-        startIcon={icon}
-        fullWidth
-      >
-        {label}
-      </Button>
-    </li>
-  );
-}
-
-function AnnouncementsFeed() {
-  const announcements = [
-    { id: 1, title: "Campus Cleanup Drive", content: "Join us this Saturday for a campus-wide cleanup initiative.", date: "2024-03-15" },
-    { id: 2, title: "New Library Hours", content: "The central library will now be open 24/7 during exam weeks.", date: "2024-03-14" },
-    { id: 3, title: "Guest Lecture Series", content: "Don't miss our upcoming guest lecture on AI and its applications in modern engineering.", date: "2024-03-13" },
-  ];
-
-  return (
-    <div className="announcements">
-      <h2 className="announcements-title">Announcements</h2>
-      {announcements.map((announcement) => (
-        <Card key={announcement.id} className="announcement-card">
-          <CardHeader>
-            <Typography variant="h6">{announcement.title}</Typography>
-            <Typography variant="body2" color="textSecondary">{announcement.date}</Typography>
-          </CardHeader>
-          <CardContent>
-            <Typography variant="body1">{announcement.content}</Typography>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}
-
-function EventsCalendar() {
-  return <div className="placeholder-text">Events Calendar (To be implemented)</div>;
-}
-
-function MessagingSystem() {
-  return <div className="placeholder-text">Messaging System (To be implemented)</div>;
-}
-
-function ResourceSharing() {
-  return <div className="placeholder-text">Resource Sharing (To be implemented)</div>;
-}
-
-function UserProfile() {
-  return <div className="placeholder-text">User Profile (To be implemented)</div>;
 }

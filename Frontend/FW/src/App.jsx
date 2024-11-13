@@ -6,20 +6,26 @@ import Footer from './components/Footer/Footer';
 import AppDownload from './components/AppDownload/AppDownload';
 import LoginPopup from './components/LoginPopup/LoginPopup';
 import Body from './components/Body/Body';
+import LoginPage from './components/LOGIN/login';
+import SmartCampusConnect from './components/Body/Body';
+import { Route, Routes } from 'react-router-dom';
+
+import HomePage from './pages/HomePage';
+
+import DashboardPage from './pages/Dashboard';
+
+
 
 const App = () => {
-  const [showLogin,setShowLogin]=useState(false)
+ 
   return (
     <>
-    {showLogin?<LoginPopup setShowLogin={setShowLogin}/>:<></>}
       <div classname='app'>
-        
-      <Navbar setShowLogin={setShowLogin}/>
-        <Body/>
-        <AppDownload/>
-        
+         <Routes>
+            <Route path='/' element={<HomePage/>}/>
+            <Route path='/dash' element={<DashboardPage/>}/>
+        </Routes> 
       </div>
-      <Footer/>
     </>
   )
 }
