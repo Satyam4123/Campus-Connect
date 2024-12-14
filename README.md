@@ -55,8 +55,6 @@ npm install
 cd ..
 cd Frontend
 npm install
-cd FW
-npm install
 ```
 
 ### 3. Set Up Environment Variables
@@ -89,7 +87,6 @@ In the frontend folder, start the React development server by running:
 
 ```bash
 cd Frontend
-cd FW
 npm run dev
 ```
 ## Accessing the application
