@@ -7,9 +7,11 @@ import twitter_icon from './twitter_icon.png'
 import play_store from './play_store.png'
 import app_store from './app_store.png'
 import vid from './vid.mp4'
+import fireimg from './fire.gif'
 
 
 export const assets={
+    fireimg,
     logo,
     search_icon,
     facebook_icon,
