@@ -27,13 +27,13 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="login-content" >
-      <div className="gif">
-        <img src={assets.fireimg} alt="" />
+    <main className="login-content flex items-center justify-center bg-black" >
+      <div className="gif w-1/2">
+        <img src={assets.fireimg} alt="" className="w-full h-full object-contain"/>
       </div>
-      <div className="login-box">
+      <div className="login-box w-1/2 flex flex-col justify-center items-center">
         <div className="logo-container">
-          <h1 className="rive-logo">CAMPUS CONNECT</h1>
+          <h1 className="text-red-700">CAMPUS CONNECT</h1>
         </div>
 
         <p className="login-subtitle">Express login via Google and Facebook</p>
