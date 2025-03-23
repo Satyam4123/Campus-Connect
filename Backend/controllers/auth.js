@@ -38,6 +38,7 @@ const login=async(req,res)=>{
             userId:user._id
         })
     } catch (error) {
+        console.log(error)
         res.status(500).json("Internal server error")
     }
 }

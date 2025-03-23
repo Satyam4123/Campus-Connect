@@ -16,13 +16,23 @@ router.get(
 );
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "/" }),
+  passport.authenticate("google", { failureRedirect: "/login" }),
   (req, res) => {
-    res.json({message:"Google Authentication successful",
-        user:req.user
-    });
+    // Redirect to the frontend with user data
+    res.redirect(
+      `http://localhost:5173/SmartCampusConnect?user=${encodeURIComponent(
+        JSON.stringify(req.user)
+      )}`
+    );
   }
 );
+router.get("/user", (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({ user: req.user });
+  } else {
+    res.status(401).json({ message: "Unauthorized" });
+  }
+});
 router.get("/profile", protect, (req, res) => {
   res.send(`Welcome ${req.user.displayName}`);
 });

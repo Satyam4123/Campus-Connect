@@ -1,19 +1,14 @@
-import React from 'react';
-import { Route, Routes } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import DashboardPage from './pages/Dashboard';
+import { Routes, Route } from "react-router-dom";
+import DashboardPage from "./pages/Dashboard";
+import SmartCampusConnect from "./components/Body/Body";
 
-const App = () => {
+function App() {
   return (
-    <>
-      <div classname='app'>
-        <Routes>
-          <Route path='/' element={<HomePage />} />
-          {/* <Route path='/dash' element={<DashboardPage />} /> */}
-        </Routes>
-      </div>
-    </>
+    <Routes>
+      <Route path="/" element={<DashboardPage />} />
+      <Route path="/SmartCampusConnect" element={<SmartCampusConnect />} />
+    </Routes>
   );
-};
+}
 
 export default App;
