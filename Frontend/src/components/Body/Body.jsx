@@ -178,6 +178,16 @@ export default function SmartCampusConnect() {
               ))}
             </div>
           )}
+          <button
+            className="logout-button mr-10"
+            onClick={() => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              navigate('/login');
+            }}
+          >
+            Logout
+          </button>
         </div>
       </nav>
 
