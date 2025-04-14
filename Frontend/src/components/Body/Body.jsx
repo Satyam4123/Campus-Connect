@@ -19,24 +19,14 @@ export default function SmartCampusConnect() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Extract the user data from the query parameter
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const userParam = urlParams.get("user");
-
-    if (userParam) {
-      const userData = JSON.parse(decodeURIComponent(userParam));
-      setUser(userData);
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
     } else {
-      // If no user data in the query parameter, redirect to login
       navigate("/login");
     }
-  }, [location, navigate]);
-
-  // If user is not set, show a loading state
-  if (!user) {
-    return <div>Loading...</div>;
-  }
+  }, [navigate]);
 
   const addResource = (type) => {
     const newResource = {

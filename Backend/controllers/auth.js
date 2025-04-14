@@ -34,25 +34,40 @@ const login = async (req, res) => {
     const { email, password } = req.body;
     const user = await users.findOne({ email });
     if (!user) {
-      return res
-        .status(403)
-        .json({ message: "No user associated with this email" });
+      return res.status(401).json({
+        success: false,
+        message: "Authentication failed",
+        errors: ["No account found with this email"],
+      });
     }
     const isPassEqual = await bcrypt.compare(password, user.password);
     if (!isPassEqual) {
-      return res.status(403).json({ message: "Wrong email or password" });
+      return res.status(401).json({
+        success: false,
+        message: "Authentication failed",
+        errors: ["Incorrect password"],
+      });
     }
     const jwtToken = generateJWT(user.id);
-    res.status(201).json({
+    res.status(200).json({
+      success: true,
       message: "Login successful",
-      name: user.name,
-      email: user.email,
-      jwtToken,
-      userId: user._id,
+      data: {
+        name: user.name,
+        email: user.email,
+        jwtToken,
+        userId: user._id,
+        department: user.department,
+        year: user.year
+      }
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json("Internal server error");
+    console.error("Login error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 };
 

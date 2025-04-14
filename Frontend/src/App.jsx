@@ -1,14 +1,19 @@
-import { Routes, Route } from "react-router-dom";
-import DashboardPage from "./pages/Dashboard";
-import SmartCampusConnect from "./components/Body/Body";
+import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./components/LOGIN/login";
+import DashboardPage from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<LoginPage />} />
-      <Route path="/SmartCampusConnect" element={<SmartCampusConnect />} />
-    </Routes>
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        } />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
   );
 }
 

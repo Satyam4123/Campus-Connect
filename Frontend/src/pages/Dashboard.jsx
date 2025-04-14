@@ -6,9 +6,9 @@ import Footer from '../components/Footer/Footer'
 const DashboardPage = () => {
   return (
     <div>
-         <SmartCampusConnect/>
-         <AppDownload/>
-         <Footer/>
+      <SmartCampusConnect />
+      <AppDownload />
+      <Footer />
     </div>
   )
 }

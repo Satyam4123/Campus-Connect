@@ -15,9 +15,11 @@ export default function LoginPage() {
 
   const [tabValue, setTabValue] = useState(0);
   const [errors, setErrors] = useState([]);
+  const [loginErrors, setLoginErrors] = useState([]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:3000/auth/google";
@@ -28,9 +30,59 @@ export default function LoginPage() {
     setErrors([]);
   };
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login submitted:", { email, password });
+    setLoginErrors([]);
+    setIsLoggingIn(true);
+
+    try {
+      const response = await axios.post("http://localhost:3000/auth/login", {
+        email,
+        password
+      });
+
+      if (response.data.success) {
+        setSnackbarMessage(response.data.message);
+        setSnackbarSeverity("success");
+        setOpenSnackbar(true);
+
+        // Store user data and token
+        localStorage.setItem('token', response.data.data.jwtToken);
+        localStorage.setItem('user', JSON.stringify({
+          name: response.data.data.name,
+          email: response.data.data.email,
+          userId: response.data.data.userId,
+          department: response.data.data.department,
+          year: response.data.data.year
+        }));
+
+        // Redirect to dashboard or home page
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      if (error.response) {
+        if (error.response.data.errors) {
+          // Joi validation errors
+          setLoginErrors(error.response.data.errors);
+        } else if (error.response.data.message) {
+          // Authentication errors
+          setSnackbarMessage(error.response.data.message);
+          setSnackbarSeverity("error");
+          setOpenSnackbar(true);
+
+          if (error.response.data.errors) {
+            setLoginErrors(error.response.data.errors);
+          }
+        }
+      } else {
+        // Network errors
+        setSnackbarMessage("Network error. Please try again.");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+      }
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   const handleSignUpSubmit = async (e) => {
@@ -128,15 +180,28 @@ export default function LoginPage() {
         <Box className="w-full max-w-md">
           {tabValue === 0 && (
             <form onSubmit={handleLoginSubmit} className="space-y-4">
+              {loginErrors.length > 0 && (
+                <div className="mb-4">
+                  {loginErrors.map((error, index) => (
+                    <Alert key={index} severity="error" className="mb-2">
+                      {error}
+                    </Alert>
+                  ))}
+                </div>
+              )}
+
               <Input
-                type="text"
-                placeholder="Email or username"
+                type="email"
+                placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 variant="outlined"
                 fullWidth
                 className="bg-white rounded-lg p-2"
+                error={loginErrors.some(e => e.includes("Email"))}
+                required
               />
+
               <Input
                 type="password"
                 placeholder="Password"
@@ -145,9 +210,18 @@ export default function LoginPage() {
                 variant="outlined"
                 fullWidth
                 className="bg-white rounded-lg p-2"
+                error={loginErrors.some(e => e.includes("Password"))}
+                required
               />
-              <Button type="submit" variant="contained" color="primary" className="w-full">
-                Log in
+
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                className="w-full"
+                disabled={isLoggingIn}
+              >
+                {isLoggingIn ? "Logging in..." : "Log in"}
               </Button>
             </form>
           )}
