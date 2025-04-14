@@ -1,14 +1,23 @@
 import { useState } from "react";
-import { Button, TextField, Tabs, Tab, Box } from "@mui/material";
+import { Button, Input, Tabs, Tab, Box,Alert,Snackbar } from "@mui/material";
 import { assets } from "../../assets/assets";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [department, setDepartment] = useState("");
+  const [year, setYear] = useState("");
+
   const [tabValue, setTabValue] = useState(0);
+  const [errors, setErrors] = useState([]);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:3000/auth/google";
@@ -16,6 +25,7 @@ export default function LoginPage() {
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
+    setErrors([]);
   };
 
   const handleLoginSubmit = (e) => {
@@ -23,9 +33,51 @@ export default function LoginPage() {
     console.log("Login submitted:", { email, password });
   };
 
-  const handleSignUpSubmit = (e) => {
+  const handleSignUpSubmit = async (e) => {
     e.preventDefault();
-    console.log("Sign up submitted:", { email, password, confirmPassword });
+    setErrors([]); 
+
+    try {
+      const response = await axios.post("http://localhost:3000/auth/signup", {
+        name,
+        email,
+        password,
+        department,
+        year
+      });
+
+      if (response.data.success) {
+        setSnackbarMessage(response.data.message);
+        setSnackbarSeverity("success");
+        setOpenSnackbar(true);
+        alert("Signup Successful! Please login")
+        setTabValue(0);
+        setName("");
+        setEmail("");
+        setPassword("");
+        setDepartment("");
+        setYear("");
+      }
+    } catch (error) {
+      if (error.response) {
+        if (error.response.data.errors) {
+          setErrors(error.response.data.errors);
+        } else if (error.response.data.message) {
+          setSnackbarMessage(error.response.data.message);
+          setSnackbarSeverity("error");
+          setOpenSnackbar(true);
+        }
+      } else {
+
+        setSnackbarMessage("Network error. Please try again.");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+      }
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   return (
@@ -35,6 +87,16 @@ export default function LoginPage() {
       </div>
       <div className="w-1/2 flex flex-col items-center">
         <h1 className="text-red-700 font-bold text-6xl">CAMPUS CONNECT</h1>
+        {errors.length > 0 && (
+          <div className="w-full max-w-md mb-4">
+            {errors.map((error, index) => (
+              <Alert key={index} severity="error" className="mb-2">
+                {error}
+              </Alert>
+            ))}
+          </div>
+        )}
+        
 
         <p className="text-gray-300 mt-4">Express login via Google</p>
 
@@ -66,23 +128,23 @@ export default function LoginPage() {
         <Box className="w-full max-w-md">
           {tabValue === 0 && (
             <form onSubmit={handleLoginSubmit} className="space-y-4">
-              <TextField
+              <Input
                 type="text"
                 placeholder="Email or username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 variant="outlined"
                 fullWidth
-                className="bg-white rounded-lg"
+                className="bg-white rounded-lg p-2"
               />
-              <TextField
+              <Input
                 type="password"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 variant="outlined"
                 fullWidth
-                className="bg-white rounded-lg"
+                className="bg-white rounded-lg p-2"
               />
               <Button type="submit" variant="contained" color="primary" className="w-full">
                 Log in
@@ -92,33 +154,61 @@ export default function LoginPage() {
 
           {tabValue === 1 && (
             <form onSubmit={handleSignUpSubmit} className="space-y-4">
-              <TextField
+              <Input
                 type="text"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                variant="outlined"
+                fullWidth
+                className="bg-white rounded-lg p-2"
+                error={errors.some(e => e.includes("Name"))}
+              />
+
+              <Input
+                type="email"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 variant="outlined"
                 fullWidth
-                className="bg-white rounded-lg"
+                className="bg-white rounded-lg p-2"
+                error={errors.some(e => e.includes("Email"))}
               />
-              <TextField
+
+              <Input
                 type="password"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 variant="outlined"
                 fullWidth
-                className="bg-white rounded-lg"
+                className="bg-white rounded-lg p-2"
+                error={errors.some(e => e.includes("Password"))}
               />
-              <TextField
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+
+              <Input
+                type="text"
+                placeholder="Department"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
                 variant="outlined"
                 fullWidth
-                className="bg-white rounded-lg"
+                className="bg-white rounded-lg p-2"
+                error={errors.some(e => e.includes("Department"))}
               />
+
+              <Input
+                type="number"
+                placeholder="Year"
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                variant="outlined"
+                fullWidth
+                className="bg-white rounded-lg p-2"
+                error={errors.some(e => e.includes("Year"))}
+              />
+
               <Button type="submit" variant="contained" color="primary" className="w-full">
                 Sign Up
               </Button>
