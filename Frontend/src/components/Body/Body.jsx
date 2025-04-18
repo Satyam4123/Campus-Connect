@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Bell, Calendar, ChevronLeft, ChevronRight, Eye, FileText, Folder, Home, MessageCircle, Plus, Search, Trash, User, X, Edit3 } from "lucide-react";
+import { Bell, Calendar, ChevronLeft, ChevronRight, Eye, FileText, Folder, Home, MessageCircle, Plus, Search, Trash, User, X, Edit3, UserPen } from "lucide-react";
 import "./Body.css";
+import axios from 'axios'
+import Profile from "../ProfilePage";
 
 export default function SmartCampusConnect() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,6 +21,25 @@ export default function SmartCampusConnect() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchAnnouncements=async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:3000/announcements', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setAnnouncements(response.data)
+      } catch (error) {
+        console.error("Error fetching announcements",error)
+      }
+    }
+    if(activeSection==='home'){
+      fetchAnnouncements()
+    }
+  }, [activeSection])
+  
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
@@ -179,12 +200,13 @@ export default function SmartCampusConnect() {
             </div>
           )}
           <button
-            className="logout-button mr-10"
             onClick={() => {
               localStorage.removeItem('token');
               localStorage.removeItem('user');
+              localStorage.removeItem('userId')
               navigate('/login');
             }}
+            className="mr-4 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
           >
             Logout
           </button>
@@ -228,38 +250,82 @@ export default function SmartCampusConnect() {
             <MessageCircle className="sidebar-icon" />
             <span>Messages</span>
           </button>
+          <button
+            className="sidebar-button"
+            onClick={() => navigate("/profile")}
+          >
+            <UserPen className="sidebar-icon" />
+            <span>Profile</span>
+          </button>
+
         </aside>
 
         <main className="content-area">
           {activeSection === "home" && (
-            <section className="announcements-section">
-              <h2>Announcements</h2>
-              {announcements.map((announcement) => (
-                <div key={announcement.id} className="announcement-item">
-                  {editAnnouncementId === announcement.id ? (
-                    <input
-                      type="text"
-                      value={announcement.content}
-                      onChange={(e) =>
-                        editAnnouncement(announcement.id, e.target.value)
-                      }
-                      onBlur={() => setEditAnnouncementId(null)}
-                    />
-                  ) : (
-                    <span>{announcement.content}</span>
-                  )}
-                  <div className="announcement-actions">
-                    <Edit3
-                      className="action-icon"
-                      onClick={() => toggleEditAnnouncement(announcement.id)}
-                    />
-                    <Trash
-                      className="action-icon"
-                      onClick={() => deleteAnnouncement(announcement.id)}
-                    />
-                  </div>
+            <section className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">Announcements</h2>
+                {user && (
+                  <button
+                    onClick={() => navigate('/create-announcement')}
+                    className="flex items-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <Plus className="mr-2" size={18} />
+                    New Announcement
+                  </button>
+                )}
+              </div>
+
+              {announcements.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  No announcements yet. Check back later!
                 </div>
-              ))}
+              ) : (
+                <div className="space-y-4">
+                  {announcements.map((announcement) => (
+                    <div key={announcement._id} className="bg-white p-6 rounded-lg shadow-md">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-xl font-semibold text-gray-800">
+                            {announcement.title}
+                          </h3>
+                          <p className="text-sm text-gray-500 mb-2">
+                            Posted by {announcement.author} • {new Date(announcement.date).toLocaleDateString()}
+                          </p>
+                        </div>
+                        {user && user.name === announcement.author && (
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => toggleEditAnnouncement(announcement._id)}
+                              className="text-blue-500 hover:text-blue-700"
+                            >
+                              <Edit3 size={18} />
+                            </button>
+                            <button
+                              onClick={() => deleteAnnouncement(announcement._id)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash size={18} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-2 text-gray-700">
+                        {editAnnouncementId === announcement._id ? (
+                          <textarea
+                            value={announcement.content}
+                            onChange={(e) => editAnnouncement(announcement._id, e.target.value)}
+                            className="w-full p-2 border rounded"
+                            onBlur={() => setEditAnnouncementId(null)}
+                          />
+                        ) : (
+                          <p>{announcement.content}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
           )}
 

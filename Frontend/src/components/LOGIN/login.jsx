@@ -48,6 +48,7 @@ export default function LoginPage() {
 
         // Store user data and token
         localStorage.setItem('token', response.data.data.jwtToken);
+        localStorage.setItem('userId', response.data.data.userId);
         localStorage.setItem('user', JSON.stringify({
           name: response.data.data.name,
           email: response.data.data.email,
