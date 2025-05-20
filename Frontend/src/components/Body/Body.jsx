@@ -7,6 +7,11 @@ import Profile from "../ProfilePage";
 
 export default function SmartCampusConnect() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState({
+    announcements: [],
+    users: []
+  });
+  const [isSearching, setIsSearching] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [notifications, setNotifications] = useState([]);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
@@ -22,7 +27,7 @@ export default function SmartCampusConnect() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchAnnouncements=async () => {
+    const fetchAnnouncements = async () => {
       try {
         const token = localStorage.getItem('token');
         const response = await axios.get('http://localhost:3000/announcements', {
@@ -32,14 +37,14 @@ export default function SmartCampusConnect() {
         });
         setAnnouncements(response.data)
       } catch (error) {
-        console.error("Error fetching announcements",error)
+        console.error("Error fetching announcements", error)
       }
     }
-    if(activeSection==='home'){
+    if (activeSection === 'home') {
       fetchAnnouncements()
     }
   }, [activeSection])
-  
+
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
@@ -48,6 +53,55 @@ export default function SmartCampusConnect() {
       navigate("/login");
     }
   }, [navigate]);
+
+  // Debounce search to prevent too many API calls
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (searchQuery.trim() !== '') {
+        handleSearch();
+      } else {
+        setIsSearching(false);
+        setSearchResults({
+          announcements: [],
+          users: []
+        });
+      }
+    }, 500);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+
+    setIsSearching(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:3000/search?query=${encodeURIComponent(searchQuery)}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setSearchResults({
+        announcements: response.data.announcements || [],
+        users: response.data.users || []
+      });
+    } catch (error) {
+      console.error("Error searching:", error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    setSearchResults({
+      announcements: [],
+      users: []
+    });
+    setIsSearching(false);
+  };
 
   const addResource = (type) => {
     const newResource = {
@@ -71,8 +125,8 @@ export default function SmartCampusConnect() {
 
   const handleSectionClick = (section) => {
     setActiveSection(section);
-    // Show sliding window popup
-    alert(`To be implemented: ${section}`);
+    // Clear search when changing sections
+    clearSearch();
   };
 
   const handleNotificationClick = () => {
@@ -158,6 +212,11 @@ export default function SmartCampusConnect() {
     return days;
   };
 
+  // Determine which announcements to display based on search state
+  const displayedAnnouncements = searchQuery.trim() !== '' && searchResults.announcements.length > 0
+    ? searchResults.announcements
+    : announcements;
+
   return (
     <div className="smart-campus-connect">
       <nav className="navbar">
@@ -167,11 +226,18 @@ export default function SmartCampusConnect() {
             <Search className="search-icon" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search announcements, users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="search-input"
             />
+            {searchQuery && (
+              <X
+                className="clear-search-icon"
+                onClick={clearSearch}
+                style={{ cursor: 'pointer', position: 'absolute', right: '10px' }}
+              />
+            )}
           </div>
           <button
             className="notification-button"
@@ -257,14 +323,15 @@ export default function SmartCampusConnect() {
             <UserPen className="sidebar-icon" />
             <span>Profile</span>
           </button>
-
         </aside>
 
         <main className="content-area">
           {activeSection === "home" && (
             <section className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Announcements</h2>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {searchQuery.trim() !== '' ? 'Search Results' : 'Announcements'}
+                </h2>
                 {user && (
                   <button
                     onClick={() => navigate('/create-announcement')}
@@ -276,13 +343,54 @@ export default function SmartCampusConnect() {
                 )}
               </div>
 
-              {announcements.length === 0 ? (
+              {/* Search results section */}
+              {searchQuery.trim() !== '' && (
+                <div className="mb-6">
+                  {isSearching ? (
+                    <div className="text-center py-4">
+                      <p className="text-gray-500">Searching...</p>
+                    </div>
+                  ) : (
+                    <>
+                      {searchResults.announcements.length === 0 && searchResults.users.length === 0 ? (
+                        <div className="text-center py-4">
+                          <p className="text-gray-500">No results found for "{searchQuery}"</p>
+                        </div>
+                      ) : (
+                        <>
+                          {searchResults.users.length > 0 && (
+                            <div className="mb-6">
+                              <h3 className="text-lg font-semibold text-gray-700 mb-3">Users</h3>
+                              <div className="space-y-2">
+                                {searchResults.users.map(user => (
+                                  <div key={user._id} className="bg-white p-4 rounded-lg shadow-sm flex items-center">
+                                    <User className="mr-3 text-gray-500" size={20} />
+                                    <div>
+                                      <p className="font-medium">{user.name}</p>
+                                      {user.department && <p className="text-sm text-gray-500">{user.department}</p>}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Display announcements - either search results or all announcements */}
+              {displayedAnnouncements.length === 0 && !isSearching ? (
                 <div className="text-center py-8 text-gray-500">
-                  No announcements yet. Check back later!
+                  {searchQuery.trim() !== ''
+                    ? "No announcements found matching your search."
+                    : "No announcements yet. Check back later!"}
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {announcements.map((announcement) => (
+                  {displayedAnnouncements.map((announcement) => (
                     <div key={announcement._id} className="bg-white p-6 rounded-lg shadow-md">
                       <div className="flex justify-between items-start">
                         <div>
