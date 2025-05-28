@@ -229,6 +229,8 @@ export default function LoginPage() {
 
           {tabValue === 1 && (
             <form onSubmit={handleSignUpSubmit} className="space-y-4">
+              <div className=" h-48 overflow-y-scroll flex flex-col gap-3 p-2">
+
               <Input
                 type="text"
                 placeholder="Name"
@@ -283,6 +285,7 @@ export default function LoginPage() {
                 className="bg-white rounded-lg p-2"
                 error={errors.some(e => e.includes("Year"))}
               />
+              </div>
 
               <Button type="submit" variant="contained" color="primary" className="w-full">
                 Sign Up

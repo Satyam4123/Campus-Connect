@@ -329,7 +329,7 @@ export default function SmartCampusConnect() {
           {activeSection === "home" && (
             <section className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">
+                <h2 className="text-2xl font-bold text-white">
                   {searchQuery.trim() !== '' ? 'Search Results' : 'Announcements'}
                 </h2>
                 {user && (
@@ -391,10 +391,10 @@ export default function SmartCampusConnect() {
               ) : (
                 <div className="space-y-4">
                   {displayedAnnouncements.map((announcement) => (
-                    <div key={announcement._id} className="bg-white p-6 rounded-lg shadow-md">
+                    <div key={announcement._id} className="bg-slate-900 border-solid border-2 border-white p-6 rounded-lg shadow-md">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="text-xl font-semibold text-gray-800">
+                          <h3 className="text-xl font-semibold text-red-700">
                             {announcement.title}
                           </h3>
                           <p className="text-sm text-gray-500 mb-2">
@@ -427,7 +427,7 @@ export default function SmartCampusConnect() {
                             onBlur={() => setEditAnnouncementId(null)}
                           />
                         ) : (
-                          <p>{announcement.content}</p>
+                          <p className="text-white">{announcement.content}</p>
                         )}
                       </div>
                     </div>
