@@ -21,8 +21,16 @@ export default function SmartCampusConnect() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showNotifications, setShowNotifications] = useState(false);
   const [events, setEvents] = useState({});
-  const [user, setUser] = useState(null); // Add user state
-
+  const [user, setUser] = useState(null);
+  
+  // New states for announcement modal
+  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
+  const [newAnnouncement, setNewAnnouncement] = useState({
+    title: '',
+    content: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -67,13 +75,11 @@ export default function SmartCampusConnect() {
         });
       }
     }, 500);
-
     return () => clearTimeout(debounceTimer);
   }, [searchQuery]);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
-
     setIsSearching(true);
     try {
       const token = localStorage.getItem('token');
@@ -82,7 +88,6 @@ export default function SmartCampusConnect() {
           Authorization: `Bearer ${token}`,
         },
       });
-
       setSearchResults({
         announcements: response.data.announcements || [],
         users: response.data.users || []
@@ -103,12 +108,49 @@ export default function SmartCampusConnect() {
     setIsSearching(false);
   };
 
+  // New function to handle announcement creation
+  const handleCreateAnnouncement = async (e) => {
+    e.preventDefault();
+    if (!newAnnouncement.title.trim() || !newAnnouncement.content.trim()) {
+      alert('Please fill in both title and content');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post('http://localhost:3000/announcements/add', {
+        title: newAnnouncement.title,
+        content: newAnnouncement.content
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+
+      // Add the new announcement to the list
+      setAnnouncements(prev => [response.data.newAnnouncement, ...prev]);
+      
+      // Reset form and close modal
+      setNewAnnouncement({ title: '', content: '' });
+      setShowAnnouncementModal(false);
+      
+      alert('Announcement created successfully!');
+    } catch (error) {
+      console.error("Error creating announcement:", error);
+      alert('Error creating announcement. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const addResource = (type) => {
     const newResource = {
       id: Date.now(),
       name: type === "folder" ? "New Folder" : "New File",
       type,
-      addedBy: user.name || "Current User", // Use the logged-in user's name
+      addedBy: user.name || "Current User",
       dateAdded: new Date(),
     };
     setResources([...resources, newResource]);
@@ -120,12 +162,10 @@ export default function SmartCampusConnect() {
 
   const viewResource = (resource) => {
     alert(`Viewing ${resource.type}: ${resource.name}`);
-    // In a real app, this would open the file or show folder contents
   };
 
   const handleSectionClick = (section) => {
     setActiveSection(section);
-    // Clear search when changing sections
     clearSearch();
   };
 
@@ -137,22 +177,15 @@ export default function SmartCampusConnect() {
     }
   };
 
-  const addAnnouncement = () => {
-    const newAnnouncement = {
-      id: Date.now(),
-      content: "New Announcement",
-    };
-    setAnnouncements([...announcements, newAnnouncement]);
-  };
-
-  const deleteAnnouncement = (id) => {
-    setAnnouncements(announcements.filter((announcement) => announcement.id !== id));
+  const deleteAnnouncement = async (id) => {
+    // This would need a delete endpoint on your backend
+    setAnnouncements(announcements.filter((announcement) => announcement._id !== id));
   };
 
   const editAnnouncement = (id, newContent) => {
     setAnnouncements(
       announcements.map((announcement) =>
-        announcement.id === id ? { ...announcement, content: newContent } : announcement
+        announcement._id === id ? { ...announcement, content: newContent } : announcement
       )
     );
   };
@@ -178,11 +211,9 @@ export default function SmartCampusConnect() {
       0
     ).getDate();
     const days = [];
-
     for (let i = 1; i <= daysInMonth; i++) {
       const currentDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
       const eventExists = events[currentDay.toDateString()];
-
       days.push(
         <div
           key={i}
@@ -212,7 +243,6 @@ export default function SmartCampusConnect() {
     return days;
   };
 
-  // Determine which announcements to display based on search state
   const displayedAnnouncements = searchQuery.trim() !== '' && searchResults.announcements.length > 0
     ? searchResults.announcements
     : announcements;
@@ -222,7 +252,7 @@ export default function SmartCampusConnect() {
       <nav className="navbar">
         <h1 className="app-title">SMART CAMPUS CONNECT</h1>
         <div className="nav-actions">
-          <div className="search-container">
+          <div className="search-container flex justify-center items-center">
             <Search className="search-icon" />
             <input
               type="text"
@@ -279,6 +309,78 @@ export default function SmartCampusConnect() {
         </div>
       </nav>
 
+      {/* Announcement Modal */}
+      {showAnnouncementModal && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-slate-200 text-black rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-800">Create New Announcement</h2>
+              <button
+                onClick={() => {
+                  setShowAnnouncementModal(false);
+                  setNewAnnouncement({ title: '', content: '' });
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleCreateAnnouncement}>
+              <div className="mb-4">
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  value={newAnnouncement.title}
+                  onChange={(e) => setNewAnnouncement(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter announcement title"
+                  required
+                />
+              </div>
+              
+              <div className="mb-6">
+                <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+                  Content
+                </label>
+                <textarea
+                  id="content"
+                  rows="4"
+                  value={newAnnouncement.content}
+                  onChange={(e) => setNewAnnouncement(prev => ({ ...prev, content: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter announcement content"
+                  required
+                />
+              </div>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAnnouncementModal(false);
+                    setNewAnnouncement({ title: '', content: '' });
+                  }}
+                  className="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Creating...' : 'Create Announcement'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="main-content">
         <aside className="sidebar">
           <button
@@ -287,13 +389,6 @@ export default function SmartCampusConnect() {
           >
             <Home className="sidebar-icon" />
             <span>Home</span>
-            <Plus
-              className="add-icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                addAnnouncement();
-              }}
-            />
           </button>
           <button
             className="sidebar-button"
@@ -324,7 +419,7 @@ export default function SmartCampusConnect() {
             <span>Profile</span>
           </button>
         </aside>
-
+        
         <main className="content-area">
           {activeSection === "home" && (
             <section className="p-6">
@@ -334,7 +429,7 @@ export default function SmartCampusConnect() {
                 </h2>
                 {user && (
                   <button
-                    onClick={() => navigate('/create-announcement')}
+                    onClick={() => setShowAnnouncementModal(true)}
                     className="flex items-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
                   >
                     <Plus className="mr-2" size={18} />
@@ -342,7 +437,7 @@ export default function SmartCampusConnect() {
                   </button>
                 )}
               </div>
-
+              
               {/* Search results section */}
               {searchQuery.trim() !== '' && (
                 <div className="mb-6">
@@ -380,8 +475,8 @@ export default function SmartCampusConnect() {
                   )}
                 </div>
               )}
-
-              {/* Display announcements - either search results or all announcements */}
+              
+              {/* Display announcements */}
               {displayedAnnouncements.length === 0 && !isSearching ? (
                 <div className="text-center py-8 text-gray-500">
                   {searchQuery.trim() !== ''
@@ -436,7 +531,7 @@ export default function SmartCampusConnect() {
               )}
             </section>
           )}
-
+          
           {activeSection === "calendar" && (
             <section className="calendar-section">
               <div className="calendar-header">
@@ -485,7 +580,7 @@ export default function SmartCampusConnect() {
               </div>
             </section>
           )}
-
+          
           {activeSection === "resources" && (
             <section className="resources-section">
               <h2>Resources</h2>
@@ -541,7 +636,7 @@ export default function SmartCampusConnect() {
               </div>
             </section>
           )}
-
+          
           {activeSection === "messages" && (
             <section className="messages-section">
               <h2>Messages</h2>
