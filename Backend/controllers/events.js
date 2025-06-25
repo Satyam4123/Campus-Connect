@@ -25,7 +25,7 @@ const createEvent=async (req,res) => {
 }
 const getEvents=async (req,res) => {
     try {
-        const events=await Events.find().sort({date:1})
+        const events=await Events.find().sort({date:-1})
         return res.status(200).json({events})
     } catch (error) {
         return res.status(500).json({ message: "Internal Server error" });
