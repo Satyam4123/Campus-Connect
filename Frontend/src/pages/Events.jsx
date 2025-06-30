@@ -90,7 +90,7 @@ const Events = () => {
         <div
           key={i}
           onClick={() => handleDateClick(thisDate)}
-          className={`relative aspect-square flex items-center justify-center rounded border cursor-pointer transition-all hover:bg-gray-50 ${hasEvent ? "bg-blue-50 border-blue-200" : "border-gray-200"
+          className={`relative text-black aspect-square flex items-center justify-center rounded border cursor-pointer transition-all hover:bg-gray-50 ${hasEvent ? "bg-blue-50 border-blue-200" : "border-gray-200"
             }`}
         >
           <span className="text-sm">{i}</span>

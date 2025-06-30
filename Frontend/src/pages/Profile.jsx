@@ -4,7 +4,7 @@ import axios from "axios";
 const Profile = () => {
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user"));
-  const userId = user?._id;
+  const userId = user.userId;
 
   const [profile, setProfile] = useState(null);
   const [editData, setEditData] = useState({});

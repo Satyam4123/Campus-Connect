@@ -7,6 +7,8 @@ export default function Resources() {
   const [resources, setResources] = useState([]);
   const [selectedResource, setSelectedResource] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [resource, setResource] = useState(null)
+
   const [uploadData, setUploadData] = useState({
     title: "",
     description: "",
@@ -64,6 +66,40 @@ export default function Resources() {
     }
   };
 
+  const handleView = async (e) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`http://localhost:3000/resources/${selectedResource._id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      setResource(res)
+      alert("recieving the resource soon you'll be able to view it")
+    } catch (err) {
+      console.error("Failed to view resource:", err);
+      alert("Viewing resource failed");
+    }
+  }
+  const handleDownload = async (e) => {
+    try {
+      const token = localStorage.getItem("token");
+      console.log(selectedResource)
+      const res = await axios.get(`http://localhost:3000/resources/download/${selectedResource.uploader}/${selectedResource.filename}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      return res;
+  
+    } catch (err) {
+      console.error("Failed to download resource:", err);
+      alert("Downloading resource failed");
+    }
+  }
+
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
@@ -101,14 +137,23 @@ export default function Resources() {
               <p className="text-gray-700 mb-4">{selectedResource.description}</p>
             )}
             <p className="text-sm text-gray-500 mb-2">Uploaded by: {selectedResource.uploader}</p>
-            <a
-              href={`http://localhost:3000/uploads/${selectedResource.filename}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 underline"
-            >
-              View / Download File
-            </a>
+            <div className="flex gap-8 items-center">
+              <button onClick={handleView}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline"
+              >
+                View
+              </button>
+              
+              <button onClick={handleDownload}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline"
+              >
+                Download
+              </button>
+            </div>
           </div>
         </div>
       )}
