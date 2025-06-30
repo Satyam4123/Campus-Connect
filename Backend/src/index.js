@@ -39,5 +39,5 @@ app.use('/resources',resourcesRoutes)
 app.use('/voice',voiceInteration)
 
 app.listen(port, ()=>{
-    console.log(`Your app is listening at port ${port}`)
 })
+console.log(`Your app is listening at port ${port}`)

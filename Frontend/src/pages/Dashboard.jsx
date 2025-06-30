@@ -1,9 +1,37 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [resourcesCnt, setResourcesCnt] = useState(0);
+
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const { name, department, year } = user;
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      const userId = localStorage.getItem("userId");
+      const token = localStorage.getItem("token");
+      if (!userId || !token) return;
+
+      try {
+        const res = await axios.get(
+          `http://localhost:3000/resources/count/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setResourcesCnt(res.data.count);
+      } catch (error) {
+        console.error("Error fetching resources count", error);
+      }
+    };
+
+    fetchCount();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -32,7 +60,7 @@ const Dashboard = () => {
 
       {/* Stats Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-        <DashboardCard title="Resources Shared" value="128" />
+        <DashboardCard title="Resources Shared" value={resourcesCnt} />
         <DashboardCard title="Events Joined" value="17" />
         <DashboardCard title="Active Connections" value="42" />
       </div>

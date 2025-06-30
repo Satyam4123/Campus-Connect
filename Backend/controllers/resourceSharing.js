@@ -45,7 +45,7 @@ const uploadResource = async (req, res) => {
       title,
       description,
       filename: file.filename,
-      uploader: req.user.name,
+      uploader: req.user._id,
     });
     await newResource.save();
     res.status(200).json({ message: "Resource uploaded successfully" });
@@ -89,9 +89,20 @@ const downloadResource = async (req, res) => {
   }
 };
 
+const getCount=async(req, res)=>{
+  try {
+    const userId=req.params.userId
+    const count=await resources.countDocuments({uploader:userId});
+    res.status(200).json({count})
+  } catch (error) {
+    res.status.json({error:"Server error"})
+  }
+}
+
 module.exports = {
   getResources,
   uploadResource,
   downloadResource,
   viewResource,
+  getCount
 };
