@@ -20,6 +20,10 @@ const userSchema=new mongoose.Schema({
     year:{
         type:Number,
         required:true
+    },
+    profilePic:{
+        type:String,
+        default:""
     }
 })
 module.exports = mongoose.model("User", userSchema);

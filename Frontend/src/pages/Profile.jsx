@@ -8,6 +8,7 @@ const Profile = () => {
 
   const [profile, setProfile] = useState(null);
   const [editData, setEditData] = useState({});
+  const [profilePicFile, setProfilePicFile] = useState(null);
   const [deletePassword, setDeletePassword] = useState("");
   const [message, setMessage] = useState("");
   const [showEdit, setShowEdit] = useState(false);
@@ -42,10 +43,22 @@ const Profile = () => {
   const handleEdit = async (e) => {
     e.preventDefault();
     try {
+      if (profilePicFile) {
+        const formData = new FormData();
+        formData.append("image", profilePicFile);
+        await axios.post("http://localhost:3000/profile/uploadProfilePic", formData, {
+          headers: {
+            ...headers,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      }
+
       await axios.put("http://localhost:3000/profile/edit", editData, { headers });
-      setMessage("Profile updated!");
+
       const res = await axios.get(`http://localhost:3000/profile/${userId}`, { headers });
       setProfile(res.data);
+      setMessage("Profile updated!");
       setShowEdit(false);
     } catch (err) {
       setMessage(err.response?.data?.message || "Update failed");
@@ -85,12 +98,22 @@ const Profile = () => {
       )}
 
       {/* Profile Display */}
-      <div className="bg-white border p-4 rounded-lg mb-4 shadow-sm">
-        <h3 className="font-semibold text-lg mb-2 text-blue-600">Profile Information</h3>
-        <p><span className="font-medium">Name:</span> {profile?.name || "-"}</p>
-        <p><span className="font-medium">Department:</span> {profile?.department || "-"}</p>
-        <p><span className="font-medium">Year:</span> {profile?.year || "-"}</p>
+      <div className="bg-white border p-4 rounded-lg mb-4 shadow-sm flex items-center gap-6">
+        {profile?.profilePic && (
+          <img
+            src={`http://localhost:3000${profile.profilePic}`}
+            alt="Profile"
+            className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border"
+          />
+        )}
+        <div>
+          <h3 className="font-semibold text-lg mb-2 text-blue-600">Profile Information</h3>
+          <p><span className="font-medium">Name:</span> {profile?.name || "-"}</p>
+          <p><span className="font-medium">Department:</span> {profile?.department || "-"}</p>
+          <p><span className="font-medium">Year:</span> {profile?.year || "-"}</p>
+        </div>
       </div>
+
 
       {/* Edit Profile */}
       <div className="mb-6">
@@ -131,6 +154,13 @@ const Profile = () => {
               type="password"
               placeholder="New Password (optional)"
               onChange={(e) => setEditData({ ...editData, password: e.target.value })}
+              className="w-full border p-2 rounded text-gray-800"
+            />
+            <label htmlFor="">Profile pic</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setProfilePicFile(e.target.files[0])}
               className="w-full border p-2 rounded text-gray-800"
             />
             <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded">

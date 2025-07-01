@@ -1,5 +1,6 @@
-const { getProfile, editProfile,deleteProfile } = require('../controllers/profileFunctions');
+const { getProfile, editProfile,deleteProfile,uploadProfilePic } = require('../controllers/profileFunctions');
 const { protect } = require('../middlewares/protect');
+const upload = require('../middlewares/upload');
 
 const router=require('express').Router();
 
@@ -11,5 +12,7 @@ router.put('/edit',protect,editProfile)
 
 // To delete profile
 router.delete('/delete',protect,deleteProfile)
+
+router.post('/uploadProfilePic',protect, upload.single('image') ,uploadProfilePic)
 
 module.exports=router

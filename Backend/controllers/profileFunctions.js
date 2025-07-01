@@ -1,6 +1,7 @@
 const users = require("../models/users")
 const bcrypt=require('bcrypt')
-
+const path=require('path')
+const fs=require('fs')
 // Get profile
 const getProfile = async (req, res) => {
   try {
@@ -55,4 +56,23 @@ const deleteProfile=async(req,res)=>{
     }
 }
 
-module.exports={getProfile,editProfile,deleteProfile}
+const uploadProfilePic=async (req,res) => {
+  try {
+    const user=await users.findById(req.user._id)
+    if(!user) return res.status(404).json({message:"User not found"})
+    
+    if(user.profilePic){
+      const oldPath=path.join(__dirname, "..", user.profilePic)
+      if(fs.existsSync(oldPath)) fs.unlinkSync(oldPath)
+    }
+
+    user.profilePic=`/uploads/${req.user._id}/${req.file.filename}`
+
+    await user.save();
+    res.status(200).json({message:"Profile picture uploaded", imageUrl:user.profilePic})
+  } catch (error) {
+    res.status(500).json({message:"Error uploading profile pic"})
+  }
+}
+
+module.exports={getProfile,editProfile,deleteProfile,uploadProfilePic}

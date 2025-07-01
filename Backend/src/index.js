@@ -1,5 +1,6 @@
 require('dotenv').config();
 require('../config/db')
+const path=require('path')
 const express=require('express')
 const passport=require('../config/passport')
 const authRouter=require('../routes/authRoute')
@@ -29,6 +30,8 @@ app.use(
 )
 app.use(passport.initialize())
 app.use(passport.session())
+
+app.use('/uploads',express.static(path.join(__dirname, 'uploads')))
 
 app.use('/auth',authRouter)
 app.use('/profile',profileRoute)
