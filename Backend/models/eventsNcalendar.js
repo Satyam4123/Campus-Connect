@@ -17,6 +17,10 @@ const eventSchema=new mongoose.Schema({
     },
     location:{
         type:String
+    },
+    markedBy:{
+        type:mongoose.Schema.ObjectId,
+        ref:"User"
     }
 },{timestamps:true})
 

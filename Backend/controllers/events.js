@@ -9,7 +9,8 @@ const createEvent=async (req,res) => {
             description,
             date,
             time,
-            location
+            location,
+            markedBy:[req.user._id]
         })
         await newEvent.save();
         await userActivities.create({
@@ -17,6 +18,7 @@ const createEvent=async (req,res) => {
           action:"marked",
           resourceId: newEvent._id,
           timestamp: Date.now(),
+          
         });
         return res.status(200).json({message:"Event created successfully", newEvent})
     } catch (error) {
@@ -32,4 +34,14 @@ const getEvents=async (req,res) => {
     }
 }
 
-module.exports={createEvent,getEvents}
+const fetchEventCnt=async(req,res)=>{
+    try {
+        const userId=req.user._id;
+        const events=await Events.find({markedBy:userId});
+        res.status(200).json({events, count:events.length}); 
+    } catch (error) {
+        return res.status.status(500).json({message:"Failed to fetch marked events by user"})
+    }
+}
+
+module.exports={createEvent,getEvents,fetchEventCnt}
