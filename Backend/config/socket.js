@@ -1,41 +1,42 @@
-const { Server } = require("socket.io");
+const socketio = require("socket.io");
+const Message = require("../models/messages");
+const areConnected = require("../middlewares/areConnected");
 
-let io;
-const userSocketMap = {};
-
-const initSocket = (server) => {
-  io = new Server(server, {
+const socketConfig = (server) => {
+  const io = socketio(server, {
     cors: {
       origin: "http://localhost:5173",
+      methods: ["GET", "POST"],
       credentials: true,
     },
   });
 
   io.on("connection", (socket) => {
-    console.log("Socket connected:", socket.id);
+    console.log("New client connected:", socket.id);
 
-    socket.on("register", (userId) => {
-      userSocketMap[userId] = socket.id;
-      console.log(`Registered ${userId} -> ${socket.id}`);
+    socket.on("setup", (userId) => {
+      socket.join(userId.toString());
+    });
+
+    socket.on("sendMessage", async ({ senderId, receiverId, text }) => {
+      const connected = await areConnected(senderId, receiverId);
+      if (!connected) {
+        return socket.emit("error", {
+          message: "You are not connected with this user.",
+        });
+      }
+
+      const newMessage = new Message({ senderId, receiverId, text });
+      await newMessage.save();
+
+      io.to(receiverId.toString()).emit("receiveMessage", newMessage);
+      socket.emit("messageSent", newMessage);
     });
 
     socket.on("disconnect", () => {
-      console.log("Socket disconnected:", socket.id);
-      for (let userId in userSocketMap) {
-        if (userSocketMap[userId] === socket.id) {
-          delete userSocketMap[userId];
-          break;
-        }
-      }
+      console.log("Client disconnected:", socket.id);
     });
   });
 };
 
-const sendNotification = (userId, message) => {
-  const socketId = userSocketMap[userId];
-  if (socketId && io) {
-    io.to(socketId).emit("notification", message);
-  }
-};
-
-module.exports = { initSocket, sendNotification };
+module.exports = socketConfig;
