@@ -63,15 +63,13 @@ const acceptConnectionReq = async (req, res) => {
       return res.status(404).json({ message: "No pending requests." });
     }
 
-    request.status = "accepted";
-    await request.save();
-
     const newConnection = new Connection({
       user1: senderId,
       user2: receiverId,
     });
 
     await newConnection.save();
+    await request.deleteOne();
 
     return res.status(200).json({ message: "Connection request accepted!" });
   } catch (error) {
