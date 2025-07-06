@@ -1,5 +1,6 @@
 const ConnectionRequest = require("../models/connectionRequest");
 const Connection = require("../models/connections");
+const User = require("../models/users");
 
 const sendConnectionReq = async (req, res) => {
   const senderId = req.user.id;
@@ -117,9 +118,34 @@ const getPendingRequests = async (req, res) => {
   }
 };
 
+const getConnectedUsers = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const connectedUsers = await Connection.find({
+      $or: [{ user1: userId }, { user2: userId }],
+    });
+
+    const connectedUserIds = connectedUsers.map((conn) =>
+      conn.user1.equals(userId) ? conn.user2 : conn.user1
+    );
+
+    const connectedUsersData = await User.find({
+      _id: { $in: connectedUserIds },
+    }).select("_id name email");
+
+    return res.status(200).json(connectedUsersData);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Failed to fetch connected users." });
+  }
+};
+
 module.exports = {
   sendConnectionReq,
   acceptConnectionReq,
   rejectConnectionReq,
   getPendingRequests,
+  getConnectedUsers
 };
