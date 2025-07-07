@@ -4,7 +4,7 @@ const { protect } = require("../middlewares/protect");
 const {
   sendConnectionReq,
   acceptConnectionReq,
-  rejectConnectionReq, getPendingRequests, getConnectedUsers} = require("../controllers/connectionFunctions");
+  rejectConnectionReq, getPendingRequests, getConnectedUsers, sendMessage} = require("../controllers/connectionFunctions");
 
 router.post("/request/:receiverId", protect, sendConnectionReq);
 router.post("/accept/:senderId", protect, acceptConnectionReq);
@@ -12,5 +12,6 @@ router.delete("/reject/:senderId", protect, rejectConnectionReq);
 router.get('/requests/pending',protect, getPendingRequests)
 
 router.get('/', protect, getConnectedUsers)
+router.post('/send/:receiverId', protect, sendMessage)
 
 module.exports = router;

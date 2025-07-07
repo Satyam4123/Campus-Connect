@@ -1,5 +1,6 @@
 const ConnectionRequest = require("../models/connectionRequest");
 const Connection = require("../models/connections");
+const messages = require("../models/messages");
 const User = require("../models/users");
 
 const sendConnectionReq = async (req, res) => {
@@ -142,10 +143,33 @@ const getConnectedUsers = async (req, res) => {
   }
 };
 
+const sendMessage=async (req, res) => {
+  const senderId=req.user.id;
+  const receiverId=req.params.receiverId;
+
+  const {text}=req.body
+
+  if(!receiverId || !text?.trim()){
+    return res.status(400).json({message:"Text message is required."})
+  }
+  try {
+    const message=new messages({
+      senderId,
+      receiverId,
+      text:text.trim()
+    })
+    const savedMessage=await message.save();
+    res.status(201).json(savedMessage);
+  } catch (error) {
+    return res.status(500).json({message:"Failed to send message."})
+  }
+}
+
 module.exports = {
   sendConnectionReq,
   acceptConnectionReq,
   rejectConnectionReq,
   getPendingRequests,
-  getConnectedUsers
+  getConnectedUsers,
+  sendMessage
 };

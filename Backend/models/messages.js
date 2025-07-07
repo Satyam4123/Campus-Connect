@@ -15,11 +15,7 @@ const messageSchema = new mongoose.Schema(
     text: {
       type: String,
       trim: true,
-    },
-    attachment: {
-      type: String,
-      default: null,
-    },
+    }
   },
   { timestamps: true }
 );
