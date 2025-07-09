@@ -165,11 +165,36 @@ const sendMessage=async (req, res) => {
   }
 }
 
+const getHistory=async(req, res)=>{
+  const userId=req.user.id;
+  const receiverId=req.params.receiverId;
+
+  try {
+    const chat=await messages.find({
+      $or:[
+        {senderId: userId, receiverId: receiverId},
+        {senderId: receiverId, receiverId:userId}
+      ]
+    }).sort({createdAt:1});
+    res.status(200).json({
+      success:true,
+      chat
+    })
+  } catch (error) {
+    res.status(500).json({
+      success:false,
+      message:"Server Error. Failed to get previous chat."
+    })
+  }
+
+}
+
 module.exports = {
   sendConnectionReq,
   acceptConnectionReq,
   rejectConnectionReq,
   getPendingRequests,
   getConnectedUsers,
-  sendMessage
+  sendMessage,
+  getHistory
 };
