@@ -19,12 +19,12 @@ const resourcesRoutes = require("../routes/resourcesRoutes");
 const voiceInteraction = require("../routes/voiceInteraction");
 const chatRoutes = require("../routes/chatRoutes");
 
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL,
     credentials: true,
   })
 );
