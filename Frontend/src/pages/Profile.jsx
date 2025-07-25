@@ -22,7 +22,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/profile/${userId}`, { headers });
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/profile/${userId}`, { headers });
         setProfile(res.data);
         setEditData(res.data);
       } catch (err) {
@@ -46,7 +46,7 @@ const Profile = () => {
       if (profilePicFile) {
         const formData = new FormData();
         formData.append("image", profilePicFile);
-        await axios.post("http://localhost:3000/profile/uploadProfilePic", formData, {
+        await axios.post(`${import.meta.env.VITE_API_URL}/profile/uploadProfilePic`, formData, {
           headers: {
             ...headers,
             "Content-Type": "multipart/form-data",
@@ -54,9 +54,9 @@ const Profile = () => {
         });
       }
 
-      await axios.put("http://localhost:3000/profile/edit", editData, { headers });
+      await axios.put(`${import.meta.env.VITE_API_URL}/profile/edit`, editData, { headers });
 
-      const res = await axios.get(`http://localhost:3000/profile/${userId}`, { headers });
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/profile/${userId}`, { headers });
       setProfile(res.data);
       setMessage("Profile updated!");
       setShowEdit(false);
@@ -72,7 +72,7 @@ const Profile = () => {
     }
 
     try {
-      await axios.delete("http://localhost:3000/profile/delete", {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/profile/delete`, {
         headers,
         data: { password: deletePassword },
       });
@@ -101,7 +101,7 @@ const Profile = () => {
       <div className="bg-white border p-4 rounded-lg mb-4 shadow-sm flex items-center gap-6">
         {profile?.profilePic && (
           <img
-            src={`http://localhost:3000${profile.profilePic}`}
+            src={`${import.meta.env.VITE_API_URL}${profile.profilePic}`}
             alt="Profile"
             className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border"
           />

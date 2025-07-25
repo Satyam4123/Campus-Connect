@@ -23,7 +23,7 @@ const Events = () => {
   const fetchEvents = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:3000/events", {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/events`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const eventMap = {};
@@ -54,7 +54,7 @@ const Events = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        "http://localhost:3000/events/new",
+        `${import.meta.env.VITE_API_URL}/events/new`,
         {
           ...formData,
           date: selectedDate,

@@ -22,7 +22,7 @@ export default function LoginPage() {
     const [isLoggingIn, setIsLoggingIn] = useState(false);
 
     const handleGoogleLogin = () => {
-        window.location.href = "http://localhost:3000/auth/google";
+        window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
     };
 
     const handleTabChange = (event, newValue) => {
@@ -36,7 +36,7 @@ export default function LoginPage() {
         setIsLoggingIn(true);
 
         try {
-            const response = await axios.post("http://localhost:3000/auth/login", {
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, {
                 email,
                 password
             });
@@ -91,7 +91,7 @@ export default function LoginPage() {
         setErrors([]);
 
         try {
-            const response = await axios.post("http://localhost:3000/auth/signup", {
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/signup`, {
                 name,
                 email,
                 password,

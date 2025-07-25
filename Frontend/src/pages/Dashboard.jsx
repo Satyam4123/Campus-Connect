@@ -18,7 +18,7 @@ const Dashboard = () => {
 
       try {
         const res = await axios.get(
-          `http://localhost:3000/resources/count/${userId}`,
+          `${import.meta.env.VITE_API_URL}/resources/count/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -38,7 +38,7 @@ const Dashboard = () => {
 
       try {
         const res = await axios.get(
-          `http://localhost:3000/events/getCnt/`,
+          `${import.meta.env.VITE_API_URL}/events/getCnt/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

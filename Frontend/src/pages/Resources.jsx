@@ -22,7 +22,7 @@ export default function Resources() {
     const fetchResources = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:3000/resources", {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/resources`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setResources(res.data);
@@ -48,7 +48,7 @@ export default function Resources() {
     setIsUploading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post("http://localhost:3000/resources/upload", formData, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/resources/upload`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -69,7 +69,7 @@ export default function Resources() {
   const handleView = async (e) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get(`http://localhost:3000/resources/${selectedResource._id}`, {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/resources/${selectedResource._id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -86,7 +86,7 @@ export default function Resources() {
     try {
       const token = localStorage.getItem("token");
       console.log(selectedResource)
-      const res = await axios.get(`http://localhost:3000/resources/download/${selectedResource.uploader}/${selectedResource.filename}`, {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/resources/download/${selectedResource.uploader}/${selectedResource.filename}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
