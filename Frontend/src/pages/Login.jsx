@@ -294,13 +294,7 @@ export default function LoginPage() {
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between text-xs">
-                                        <label className="flex items-center text-gray-400">
-                                            <input type="checkbox" className="rounded border-gray-700 bg-gray-800 mr-2" />
-                                            Remember me
-                                        </label>
-                                        <a href="#" className="text-red-500 hover:text-red-400 transition-colors duration-200">Forgot password?</a>
-                                    </div>
+                                   
 
                                     <button
                                         onClick={handleLoginSubmit}
