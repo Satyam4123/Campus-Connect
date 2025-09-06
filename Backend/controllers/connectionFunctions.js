@@ -2,6 +2,7 @@ const ConnectionRequest = require("../models/connectionRequest");
 const Connection = require("../models/connections");
 const messages = require("../models/messages");
 const User = require("../models/users");
+const { getIO } = require("../config/socket");
 
 const sendConnectionReq = async (req, res) => {
   const senderId = req.user.id;
@@ -42,6 +43,24 @@ const sendConnectionReq = async (req, res) => {
     });
 
     await newReq.save();
+    
+    // Get sender info and emit real-time notification
+    const sender = await User.findById(senderId).select("name email department");
+    const io = getIO();
+    io.to(receiverId.toString()).emit("connectionRequest", {
+      type: "received",
+      request: {
+        _id: newReq._id,
+        sender: {
+          _id: senderId,
+          name: sender.name,
+          email: sender.email,
+          department: sender.department
+        },
+        createdAt: newReq.createdAt
+      }
+    });
+    
     return res.status(201).json({ message: "Connection request sent!" });
   } catch (error) {
     return res
@@ -73,6 +92,19 @@ const acceptConnectionReq = async (req, res) => {
     await newConnection.save();
     await request.deleteOne();
 
+    // Get user info and emit real-time notification
+    const accepter = await User.findById(receiverId).select("name email department");
+    const io = getIO();
+    io.to(senderId.toString()).emit("connectionRequest", {
+      type: "accepted",
+      user: {
+        _id: receiverId,
+        name: accepter.name,
+        email: accepter.email,
+        department: accepter.department
+      }
+    });
+
     return res.status(200).json({ message: "Connection request accepted!" });
   } catch (error) {
     return res.status(500).json({ message: "Failed to accept request." });
@@ -93,6 +125,13 @@ const rejectConnectionReq = async (req, res) => {
     if (!request) {
       return res.status(404).json({ message: "No pending requests." });
     }
+
+    // Emit real-time notification
+    const io = getIO();
+    io.to(senderId.toString()).emit("connectionRequest", {
+      type: "rejected",
+      userId: receiverId
+    });
 
     return res
       .status(200)
@@ -133,9 +172,52 @@ const getConnectedUsers = async (req, res) => {
 
     const connectedUsersData = await User.find({
       _id: { $in: connectedUserIds },
-    }).select("_id name email");
+    }).select("_id name email department profilePic");
 
-    return res.status(200).json(connectedUsersData);
+    // Get last message and unread count for each connected user
+    const usersWithChatInfo = await Promise.all(
+      connectedUsersData.map(async (user) => {
+        // Get last message between current user and this connected user
+        const lastMessage = await messages
+          .findOne({
+            $or: [
+              { senderId: userId, receiverId: user._id },
+              { senderId: user._id, receiverId: userId }
+            ]
+          })
+          .sort({ createdAt: -1 });
+
+        // Count unread messages from this user
+        const unreadCount = await messages.countDocuments({
+          senderId: user._id,
+          receiverId: userId,
+          isRead: { $ne: true }
+        });
+
+        return {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          department: user.department,
+          profilePic: user.profilePic,
+          lastMessage: lastMessage ? {
+            text: lastMessage.text,
+            createdAt: lastMessage.createdAt,
+            senderId: lastMessage.senderId
+          } : null,
+          unreadCount
+        };
+      })
+    );
+
+    // Sort by last message timestamp (most recent first)
+    usersWithChatInfo.sort((a, b) => {
+      const aTime = a.lastMessage ? new Date(a.lastMessage.createdAt) : new Date(0);
+      const bTime = b.lastMessage ? new Date(b.lastMessage.createdAt) : new Date(0);
+      return bTime - aTime;
+    });
+
+    return res.status(200).json(usersWithChatInfo);
   } catch (error) {
     return res
       .status(500)
@@ -159,6 +241,11 @@ const sendMessage=async (req, res) => {
       text:text.trim()
     })
     const savedMessage=await message.save();
+    
+    // Emit real-time message notification
+    const io = getIO();
+    io.to(receiverId.toString()).emit("receiveMessage", savedMessage);
+    
     res.status(201).json(savedMessage);
   } catch (error) {
     return res.status(500).json({message:"Failed to send message."})
@@ -176,6 +263,13 @@ const getHistory=async(req, res)=>{
         {senderId: receiverId, receiverId:userId}
       ]
     }).sort({createdAt:1});
+    
+    // Mark messages from the other user as read
+    await messages.updateMany(
+      { senderId: receiverId, receiverId: userId, isRead: false },
+      { isRead: true }
+    );
+    
     res.status(200).json({
       success:true,
       chat
@@ -186,8 +280,23 @@ const getHistory=async(req, res)=>{
       message:"Server Error. Failed to get previous chat."
     })
   }
-
 }
+
+const markMessagesAsRead = async (req, res) => {
+  const userId = req.user.id;
+  const senderId = req.params.senderId;
+
+  try {
+    await messages.updateMany(
+      { senderId: senderId, receiverId: userId, isRead: false },
+      { isRead: true }
+    );
+    
+    res.status(200).json({ success: true, message: "Messages marked as read" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to mark messages as read" });
+  }
+};
 
 module.exports = {
   sendConnectionReq,
@@ -196,5 +305,6 @@ module.exports = {
   getPendingRequests,
   getConnectedUsers,
   sendMessage,
-  getHistory
+  getHistory,
+  markMessagesAsRead
 };

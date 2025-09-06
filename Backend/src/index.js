@@ -4,10 +4,11 @@ require("../config/db");
 const path = require("path");
 const express = require("express");
 const http = require("http");
-const socketConfig = require("../config/socket");
+const { socketConfig } = require("../config/socket");
 const passport = require("../config/passport");
 
 const session = require("express-session");
+const MongoStore = require("connect-mongo");
 const cors = require("cors");
 
 const authRouter = require("../routes/authRoute");
@@ -22,10 +23,23 @@ const chatRoutes = require("../routes/chatRoutes");
 const port = process.env.PORT || 3000;
 const app = express();
 
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  process.env.DEV_CLIENT_URL
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 
@@ -35,7 +49,14 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URL,
+    }),
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
   })
 );
 
@@ -54,7 +75,7 @@ app.use("/voice", voiceInteraction);
 app.use("/message", chatRoutes);
 
 const server = http.createServer(app);
-socketConfig(server);
+const io = socketConfig(server);
 
 server.listen(port, () => {
   console.log(`Your app is listening at port ${port}`);

@@ -6,6 +6,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [resourcesCnt, setResourcesCnt] = useState(0);
   const [eventsCnt, setEventsCnt] = useState(0)
+  const [connCnt, setConnCnt] = useState(0)
 
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const { name, department, year } = user;
@@ -50,8 +51,13 @@ const Dashboard = () => {
         console.error("Error fetching resources count", error);
       }
     }
+
+    const fetchConnCnt=async () => {
+      
+    }
     fetchCount();
     fetchEventCnt()
+    fetchConnCnt()
   }, []);
 
   const handleLogout = () => {

@@ -2,10 +2,17 @@ const socketio = require("socket.io");
 const Message = require("../models/messages");
 const areConnected = require("../middlewares/areConnected");
 
+let io;
+
 const socketConfig = (server) => {
-  const io = socketio(server, {
+  const allowedOrigins = [
+    process.env.CLIENT_URL,
+    process.env.DEV_CLIENT_URL
+  ].filter(Boolean);
+
+  io = socketio(server, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: allowedOrigins,
       methods: ["GET", "POST"],
       credentials: true,
     },
@@ -37,6 +44,15 @@ const socketConfig = (server) => {
       console.log("Client disconnected:", socket.id);
     });
   });
+
+  return io;
 };
 
-module.exports = socketConfig;
+const getIO = () => {
+  if (!io) {
+    throw new Error("Socket.io not initialized!");
+  }
+  return io;
+};
+
+module.exports = { socketConfig, getIO };

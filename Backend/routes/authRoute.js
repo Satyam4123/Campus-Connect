@@ -5,6 +5,7 @@ const {
   signupValidation,
 } = require("../middlewares/validation");
 const passport = require("../config/passport");
+const generateJWT = require("../config/jwtGenerate");
 
 const router = require("express").Router();
 
@@ -18,9 +19,25 @@ router.get(
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "/login" }),
+  passport.authenticate("google", { failureRedirect: `${process.env.CLIENT_URL}/login` }),
   (req, res) => {
-    res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+    try {
+      const jwtToken = generateJWT(req.user.id);
+      const userData = {
+        name: req.user.name,
+        email: req.user.email,
+        jwtToken,
+        userId: req.user._id,
+        department: req.user.department,
+        year: req.user.year
+      };
+      
+      const encodedData = encodeURIComponent(JSON.stringify(userData));
+      res.redirect(`${process.env.CLIENT_URL}/dashboard?auth=${encodedData}`);
+    } catch (error) {
+      console.error("Google callback error:", error);
+      res.redirect(`${process.env.CLIENT_URL}/login?error=auth_failed`);
+    }
   }
 );
 
