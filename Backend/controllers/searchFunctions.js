@@ -45,13 +45,67 @@ const searchUsersForConnection = async (req, res) => {
   const { query } = req.query;
   const currentUserId = req.user.id;
 
-  if (!query || query.trim() === "") {
-    return res.status(400).json({ message: "Search query is required" });
-  }
+  // Allow empty query to return all available users
+  const searchQuery = query && query.trim() !== "" ? query.trim() : "";
 
   try {
-    const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    // Get connected user IDs
+    const connections = await Connection.find({
+      $or: [{ user1: currentUserId }, { user2: currentUserId }]
+    });
+    const connectedUserIds = connections.map(conn => 
+      conn.user1.toString() === currentUserId ? conn.user2 : conn.user1
+    );
 
+    // Get pending request user IDs
+    const pendingRequests = await ConnectionRequest.find({
+      $or: [
+        { sender: currentUserId },
+        { receiver: currentUserId }
+      ],
+      status: "pending"
+    });
+    const pendingUserIds = pendingRequests.map(req => 
+      req.sender.toString() === currentUserId ? req.receiver : req.sender
+    );
+
+    const excludeIds = [currentUserId, ...connectedUserIds, ...pendingUserIds];
+
+    let foundUsers;
+    
+    if (searchQuery === "") {
+      // Return all available users if no search query
+      foundUsers = await users
+        .find({ _id: { $nin: excludeIds } })
+        .select("name email department year")
+        .limit(20);
+    } else {
+      // Search with query
+      const safeQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      foundUsers = await users
+        .find({
+          _id: { $nin: excludeIds },
+          $or: [
+            { name: { $regex: safeQuery, $options: "i" } },
+            { email: { $regex: safeQuery, $options: "i" } },
+            { department: { $regex: safeQuery, $options: "i" } }
+          ]
+        })
+        .select("name email department year")
+        .limit(20);
+    }
+
+    res.json({ users: foundUsers });
+  } catch (error) {
+    console.error("User search error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getAllAvailableUsers = async (req, res) => {
+  const currentUserId = req.user.id;
+
+  try {
     // Get connected user IDs
     const connections = await Connection.find({
       $or: [{ user1: currentUserId }, { user2: currentUserId }]
@@ -75,22 +129,15 @@ const searchUsersForConnection = async (req, res) => {
     const excludeIds = [currentUserId, ...connectedUserIds, ...pendingUserIds];
 
     const foundUsers = await users
-      .find({
-        _id: { $nin: excludeIds },
-        $or: [
-          { name: { $regex: safeQuery, $options: "i" } },
-          { email: { $regex: safeQuery, $options: "i" } },
-          { department: { $regex: safeQuery, $options: "i" } }
-        ]
-      })
+      .find({ _id: { $nin: excludeIds } })
       .select("name email department year")
       .limit(20);
 
     res.json({ users: foundUsers });
   } catch (error) {
-    console.error("User search error:", error);
+    console.error("Get all users error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-module.exports = { searchFunctions, searchUsersForConnection };
+module.exports = { searchFunctions, searchUsersForConnection, getAllAvailableUsers };

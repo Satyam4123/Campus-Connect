@@ -85,7 +85,7 @@ export default function Resources() {
   const handleDownload = async (e) => {
     try {
       const token = localStorage.getItem("token");
-      console.log(selectedResource)
+      // Resource selected
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/resources/download/${selectedResource.uploader}/${selectedResource.filename}`, {
         headers: {
           Authorization: `Bearer ${token}`,

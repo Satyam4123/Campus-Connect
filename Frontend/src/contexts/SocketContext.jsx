@@ -17,7 +17,6 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-    console.log('Connecting to socket server:', apiUrl);
     
     const newSocket = io(apiUrl, {
       withCredentials: true,
@@ -27,11 +26,11 @@ export const SocketProvider = ({ children }) => {
     setSocket(newSocket);
 
     newSocket.on('connect', () => {
-      console.log('Connected to server');
+      // Connected to server
     });
 
     newSocket.on('disconnect', () => {
-      console.log('Disconnected from server');
+      // Disconnected from server
     });
 
     return () => {

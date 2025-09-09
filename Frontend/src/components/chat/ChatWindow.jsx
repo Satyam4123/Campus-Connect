@@ -13,7 +13,7 @@ const ChatWindow = ({selectedUser}) => {
         e.preventDefault()
         if (message.trim()) {
             // TODO: Send message logic
-            console.log('Sending message:', message)
+            // Message sent
             setMessage('')
         }
     }

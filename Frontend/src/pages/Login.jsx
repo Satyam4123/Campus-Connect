@@ -22,7 +22,7 @@ export default function LoginPage() {
     };
 
     const handleGitHubLogin = () => {
-        console.log("GitHub login initiated");
+        // GitHub login not implemented yet
     };
 
     const handleTabChange = (newValue) => {
