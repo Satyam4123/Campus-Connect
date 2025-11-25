@@ -4,13 +4,12 @@ require("../config/db");
 const path = require("path");
 const express = require("express");
 const http = require("http");
-const { socketConfig } = require("../config/socket");
-const passport = require("../config/passport");
-
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const cors = require("cors");
 
+const { socketConfig } = require("../config/socket");
+const passport = require("../config/passport");
 const authRouter = require("../routes/authRoute");
 const profileRoute = require("../routes/profileRoute");
 const announcements = require("../routes/announcementsRoute");

@@ -19,25 +19,18 @@ router.get(
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: `${process.env.CLIENT_URL}/login` }),
+  passport.authenticate("google", {
+    failureRedirect: `${process.env.CLIENT_URL}/login`,
+  }),
   (req, res) => {
-    try {
-      const jwtToken = generateJWT(req.user.id);
-      const userData = {
-        name: req.user.name,
-        email: req.user.email,
-        jwtToken,
-        userId: req.user._id,
-        department: req.user.department,
-        year: req.user.year
-      };
-      
-      const encodedData = encodeURIComponent(JSON.stringify(userData));
-      res.redirect(`${process.env.CLIENT_URL}/dashboard?auth=${encodedData}`);
-    } catch (error) {
-      console.error("Google callback error:", error);
-      res.redirect(`${process.env.CLIENT_URL}/login?error=auth_failed`);
-    }
+    const jwtToken=generateJWT(req.user.id)
+
+    res.cookie("token", jwtToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    })
   }
 );
 

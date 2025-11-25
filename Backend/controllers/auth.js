@@ -40,6 +40,7 @@ const login = async (req, res) => {
         errors: ["No account found with this email"],
       });
     }
+
     const isPassEqual = await bcrypt.compare(password, user.password);
     if (!isPassEqual) {
       return res.status(401).json({
@@ -48,18 +49,28 @@ const login = async (req, res) => {
         errors: ["Incorrect password"],
       });
     }
+
     const jwtToken = generateJWT(user.id);
+
+    // Set JWT in HTTP-only cookie
+    res.cookie("token", jwtToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: "lax",
+    });
+
+    // Send user info (without JWT) in response
     res.status(200).json({
       success: true,
       message: "Login successful",
       data: {
         name: user.name,
         email: user.email,
-        jwtToken,
         userId: user._id,
         department: user.department,
-        year: user.year
-      }
+        year: user.year,
+      },
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -70,5 +81,4 @@ const login = async (req, res) => {
     });
   }
 };
-
 module.exports = { login, signup };
