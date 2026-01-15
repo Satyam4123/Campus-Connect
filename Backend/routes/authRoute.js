@@ -6,11 +6,12 @@ const {
 } = require("../middlewares/validation");
 const passport = require("../config/passport");
 const generateJWT = require("../config/jwtGenerate");
-
 const router = require("express").Router();
+
 
 router.post("/login", loginValidation, login);
 router.post("/signup", signupValidation, signup);
+
 
 router.get(
   "/google",
@@ -31,6 +32,7 @@ router.get(
       sameSite: "Lax",
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     })
+    res.redirect(`${process.env.CLIENT_URL}`);
   }
 );
 
