@@ -1,17 +1,15 @@
+const router = require("express").Router();
+const passport = require("passport");
+const jwt = require("jsonwebtoken");
 const { login, signup } = require("../controllers/auth");
 const { protect } = require("../middlewares/protect");
 const {
   loginValidation,
   signupValidation,
 } = require("../middlewares/validation");
-const passport = require("../config/passport");
-const generateJWT = require("../config/jwtGenerate");
-const router = require("express").Router();
-
 
 router.post("/login", loginValidation, login);
 router.post("/signup", signupValidation, signup);
-
 
 router.get(
   "/google",
@@ -20,41 +18,25 @@ router.get(
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: `${process.env.CLIENT_URL}/login`,
-  }),
+  passport.authenticate("google", { session: false }),
   (req, res) => {
-    const jwtToken=generateJWT(req.user.id)
+    const token = jwt.sign({ id: req.user._id }, process.env.SECRET_KEY, {
+      expiresIn: "7d",
+    });
 
-    res.cookie("token", jwtToken, {
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    })
-    res.redirect(`${process.env.CLIENT_URL}`);
+      secure: true,
+      sameSite: "none",
+    });
+
+    res.redirect(`${process.env.CLIENT_URL}/dashboard`);
   }
 );
 
-router.get("/user", (req, res) => {
-  if (req.isAuthenticated()) {
-    res.json({ user: req.user });
-  } else {
-    res.status(401).json({ message: "Unauthorized" });
-  }
-});
-
-// Protected profile route
+// protected
 router.get("/profile", protect, (req, res) => {
-  res.send(`Welcome ${req.user.name}`);
-});
-
-// Logout route
-router.get("/logout", (req, res, next) => {
-  req.logout(function (err) {
-    if (err) return next(err);
-    res.redirect(`${process.env.CLIENT_URL}`);
-  });
+  res.json({ user: req.user });
 });
 
 module.exports = router;

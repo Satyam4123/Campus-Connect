@@ -1,7 +1,6 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/users");
-const bcrypt = require("bcrypt");
 
 passport.use(
   new GoogleStrategy(
@@ -10,42 +9,41 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: process.env.GOOGLE_CALLBACK_URL,
     },
-    async (accessToken, refreshToken, profile, done) => {
+    async (accessToken, refreshToken, profile, cb) => {
       try {
-        if (!profile.emails || !profile.emails[0]) {
-          return done(new Error("No email found in Google profile"), null);
-        }
+        const email = profile.emails[0].value;
 
-        let user = await User.findOne({ email: profile.emails[0].value });
+        let user = await User.findOne({ email });
 
-        if (!user) {
-          const hashedPassword = await bcrypt.hash("google-auth-" + Date.now(), 10);
-          user = new User({
-            name: profile.displayName,
-            email: profile.emails[0].value,
-            password: hashedPassword,
-            department: "N/A",
-            year: 0,
-          });
+        if (user) {
+          if (!user.googleId) user.googleId = profile.id;
+          user.isVerified = true;
           await user.save();
+        } else {
+          user = await User.create({
+            googleId: profile.id,
+            name: profile.displayName,
+            email,
+            profilePic: profile.photos?.[0]?.value || "",
+            isVerified: true,
+          });
         }
 
-        return done(null, user);
+        return cb(null, user);
       } catch (err) {
-        console.error("Google OAuth error:", err);
-        return done(err, null);
+        return cb(err, null);
       }
     }
   )
 );
 
 passport.serializeUser((user, done) => {
-  done(null, user.id); // Serialize the user's ID
+  done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await User.findById(id); // Deserialize the user by ID
+    const user = await User.findById(id);
     done(null, user);
   } catch (err) {
     done(err, null);
