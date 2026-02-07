@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function LoginPage() {
     const [name, setName] = useState("");
@@ -16,9 +16,32 @@ export default function LoginPage() {
     const [snackbarSeverity, setSnackbarSeverity] = useState("success");
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    useEffect(() => {
+        const error = searchParams.get("error");
+        if (error === "config") {
+            setSnackbarMessage("Server configuration error. Please try again later.");
+            setSnackbarSeverity("error");
+            setOpenSnackbar(true);
+            setSearchParams({});
+        } else if (error === "signin_failed") {
+            setSnackbarMessage("Google sign-in failed. Please try again.");
+            setSnackbarSeverity("error");
+            setOpenSnackbar(true);
+            setSearchParams({});
+        }
+    }, [searchParams, setSearchParams]);
 
     const handleGoogleLogin = () => {
-        window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+        const apiUrl = import.meta.env.VITE_API_URL;
+        if (!apiUrl) {
+            setSnackbarMessage("Sign-in is not configured. Please set VITE_API_URL and rebuild.");
+            setSnackbarSeverity("error");
+            setOpenSnackbar(true);
+            return;
+        }
+        window.location.href = `${apiUrl}/auth/google`;
     };
 
     // const handleGitHubLogin = () => {

@@ -20,23 +20,39 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { session: false }),
   (req, res) => {
+    const clientUrl = process.env.CLIENT_URL;
     const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      return res.status(500).json({
-        error: "Server misconfiguration: JWT_SECRET is not set",
-      });
+
+    if (!clientUrl) {
+      console.error("CLIENT_URL is not set");
+      return res.status(500).send(
+        "Server misconfiguration: CLIENT_URL is not set. Set it in your backend environment variables."
+      );
     }
-    const token = jwt.sign({ id: req.user._id }, secret, {
-      expiresIn: "7d",
-    });
+    if (!secret) {
+      console.error("JWT_SECRET is not set");
+      return res.redirect(`${clientUrl}/login?error=config`);
+    }
+    if (!req.user) {
+      return res.redirect(`${clientUrl}/login?error=signin_failed`);
+    }
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
+    try {
+      const token = jwt.sign({ id: req.user._id }, secret, {
+        expiresIn: "7d",
+      });
 
-    res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+      });
+
+      res.redirect(`${clientUrl}/dashboard`);
+    } catch (err) {
+      console.error("Google callback error:", err);
+      res.redirect(`${clientUrl}/login?error=signin_failed`);
+    }
   }
 );
 
