@@ -32,12 +32,19 @@ const signup = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await users.findOne({ email });
+    const user = await users.findOne({ email }).select("+password");
     if (!user) {
       return res.status(401).json({
         success: false,
         message: "Authentication failed",
         errors: ["No account found with this email"],
+      });
+    }
+    if (!user.password) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication failed",
+        errors: ["This account uses Google sign-in. Please use Sign in with Google."],
       });
     }
 
@@ -50,6 +57,13 @@ const login = async (req, res) => {
       });
     }
 
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not set");
+      return res.status(500).json({
+        success: false,
+        message: "Server configuration error. Please try again later.",
+      });
+    }
     const jwtToken = generateJWT(user.id);
 
     // Set JWT in HTTP-only cookie
