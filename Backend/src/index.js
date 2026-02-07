@@ -4,6 +4,7 @@ require("../config/db");
 const path = require("path");
 const express = require("express");
 const http = require("http");
+const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const cors = require("cors");
@@ -42,6 +43,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use(
   session({

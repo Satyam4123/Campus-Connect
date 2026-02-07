@@ -66,15 +66,15 @@ const login = async (req, res) => {
     }
     const jwtToken = generateJWT(user.id);
 
-    // Set JWT in HTTP-only cookie
+    // Set JWT in HTTP-only cookie (sameSite: "none" in prod so cookie is sent cross-origin)
     res.cookie("token", jwtToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
 
-    // Send user info (without JWT) in response
+    // Send user info and token (frontend uses token in Authorization header for API calls)
     res.status(200).json({
       success: true,
       message: "Login successful",
@@ -84,6 +84,7 @@ const login = async (req, res) => {
         userId: user._id,
         department: user.department,
         year: user.year,
+        jwtToken,
       },
     });
   } catch (error) {
