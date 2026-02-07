@@ -20,7 +20,13 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { session: false }),
   (req, res) => {
-    const token = jwt.sign({ id: req.user._id }, process.env.SECRET_KEY, {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return res.status(500).json({
+        error: "Server misconfiguration: JWT_SECRET is not set",
+      });
+    }
+    const token = jwt.sign({ id: req.user._id }, secret, {
       expiresIn: "7d",
     });
 
