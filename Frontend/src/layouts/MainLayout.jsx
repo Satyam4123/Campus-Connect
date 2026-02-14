@@ -7,9 +7,7 @@ const MainLayout = () => {
         { name: "Resources", path: "/resources" },
         { name: "Events", path: "/events" },
         { name: "Profile", path: "/profile" },
-        { name: "Messages", path: "/chat" },
-        
-        
+        { name: "Department Discussion", path: "/department-discussion" },
     ];
 
     return (

@@ -44,17 +44,10 @@ export const SocketProvider = ({ children }) => {
     }
   };
 
-  const sendMessage = (messageData) => {
-    if (socket) {
-      socket.emit('sendMessage', messageData);
-    }
-  };
-
   const value = {
     socket,
     onlineUsers,
     setupSocket,
-    sendMessage,
   };
 
   return (

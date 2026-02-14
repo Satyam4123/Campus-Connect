@@ -7,7 +7,8 @@ import Profile from "./pages/Profile";
 import Resources from "./pages/Resources";
 import Announcements from './pages/Announcements'
 import Events from "./pages/Events";
-import Chat from "./pages/Chat";
+import DepartmentDiscussion from "./pages/DepartmentDiscussion";
+
 function App() {
   return (
     <Routes>
@@ -21,7 +22,7 @@ function App() {
           <Route path="/resources" element={<Resources />} />
           <Route path="/announcements" element={<Announcements />} />
           <Route path="/events" element={<Events />} />
-          <Route path="/chat" element={<Chat />} />
+          <Route path="/department-discussion" element={<DepartmentDiscussion />} />
         </Route>
       </Route>
 

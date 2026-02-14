@@ -17,7 +17,7 @@ const announcements = require("../routes/announcementsRoute");
 const searchRoute = require("../routes/searchRoute");
 const eventRoute = require("../routes/eventRoute");
 const resourcesRoutes = require("../routes/resourcesRoutes");
-const chatRoutes = require("../routes/chatRoutes");
+const departmentDiscussionRoutes = require("../routes/departmentDiscussionRoutes");
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -71,7 +71,7 @@ app.use("/announcements", announcements);
 app.use("/search", searchRoute);
 app.use("/events", eventRoute);
 app.use("/resources", resourcesRoutes);
-app.use("/message", chatRoutes);
+app.use("/department-discussion", departmentDiscussionRoutes);
 
 const server = http.createServer(app);
 const io = socketConfig(server);
