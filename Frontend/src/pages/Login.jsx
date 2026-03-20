@@ -186,7 +186,7 @@ export default function LoginPage() {
             <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
                 <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
-                    <div className="order-2 lg:order-1 text-center lg:text-left space-y-8">
+                    <div className="order-1 lg:order-1 text-center lg:text-left space-y-8">
                         <div className="space-y-4">
                             <h1 className="text-3xl lg:text-5xl xl:text-6xl font-black tracking-tight">
                                 <span className="block text-white">CAMPUS</span>
@@ -219,7 +219,7 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    <div className="order-1 lg:order-2">
+                    <div className="order-2 lg:order-2">
                         <div className="bg-gray-900 bg-opacity-80 backdrop-blur-xl border border-gray-800 rounded-2xl p-8 lg:p-10 shadow-2xl relative overflow-hidden">
 
                             <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-red-500 to-transparent opacity-20 rounded-bl-3xl"></div>
