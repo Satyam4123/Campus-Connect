@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
-const { login, signup } = require("../controllers/auth");
+const { login, signup, bootstrapSession } = require("../controllers/auth");
 const { protect } = require("../middlewares/protect");
 const {
   loginValidation,
@@ -10,6 +10,7 @@ const {
 
 router.post("/login", loginValidation, login);
 router.post("/signup", signupValidation, signup);
+router.get("/bootstrap", protect, bootstrapSession);
 
 router.get(
   "/google",

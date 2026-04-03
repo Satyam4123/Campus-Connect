@@ -96,4 +96,36 @@ const login = async (req, res) => {
     });
   }
 };
-module.exports = { login, signup };
+
+/**
+ * For OAuth / cookie-only sessions: returns user + JWT so the SPA can populate localStorage
+ * (same shape as login) when the client has a valid `token` cookie but no stored token.
+ */
+const bootstrapSession = async (req, res) => {
+  try {
+    const user = await users.findById(req.user._id).select("-password");
+    if (!user) {
+      return res.status(401).json({ success: false, message: "User not found" });
+    }
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ success: false, message: "Server configuration error" });
+    }
+    const jwtToken = generateJWT(user._id);
+    res.status(200).json({
+      success: true,
+      data: {
+        name: user.name,
+        email: user.email,
+        userId: user._id,
+        department: user.department,
+        year: user.year,
+        jwtToken,
+      },
+    });
+  } catch (error) {
+    console.error("bootstrapSession error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+module.exports = { login, signup, bootstrapSession };
