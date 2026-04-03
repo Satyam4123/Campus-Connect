@@ -44,7 +44,9 @@ const login = async (req, res) => {
       return res.status(401).json({
         success: false,
         message: "Authentication failed",
-        errors: ["This account uses Google sign-in. Please use Sign in with Google."],
+        errors: [
+          "This account uses Google sign-in. Please use Sign in with Google.",
+        ],
       });
     }
 
@@ -105,10 +107,14 @@ const bootstrapSession = async (req, res) => {
   try {
     const user = await users.findById(req.user._id).select("-password");
     if (!user) {
-      return res.status(401).json({ success: false, message: "User not found" });
+      return res
+        .status(401)
+        .json({ success: false, message: "User not found" });
     }
     if (!process.env.JWT_SECRET) {
-      return res.status(500).json({ success: false, message: "Server configuration error" });
+      return res
+        .status(500)
+        .json({ success: false, message: "Server configuration error" });
     }
     const jwtToken = generateJWT(user._id);
     res.status(200).json({

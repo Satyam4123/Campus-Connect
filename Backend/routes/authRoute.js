@@ -49,7 +49,10 @@ router.get(
         sameSite: "none",
       });
 
-      res.redirect(`${clientUrl}/dashboard`);
+      // Hash is not sent to the server; SPA reads it and stores token for API calls.
+      // Cookie alone often fails cross-site XHR (browser blocks third-party cookies).
+      const hashToken = encodeURIComponent(token);
+      res.redirect(`${clientUrl}/dashboard#token=${hashToken}`);
     } catch (err) {
       console.error("Google callback error:", err);
       res.redirect(`${clientUrl}/login?error=signin_failed`);
