@@ -7,7 +7,7 @@ const API_BASE = `${import.meta.env.VITE_API_URL}/department-discussion`;
 export default function DepartmentDiscussion() {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState("");
   const [posting, setPosting] = useState(false);
   const [department, setDepartment] = useState("");
@@ -18,8 +18,9 @@ export default function DepartmentDiscussion() {
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
 
-  const fetchMessages = async () => {
-    setLoading(true);
+  // Initial fetch with loading state
+  const fetchMessagesInitial = async () => {
+    setInitialLoading(true);
     setError("");
     try {
       const res = await axios.get(`${API_BASE}/messages`, {
@@ -33,13 +34,29 @@ export default function DepartmentDiscussion() {
       setError(err.response?.data?.message || "Failed to load discussion");
       setMessages([]);
     } finally {
-      setLoading(false);
+      setInitialLoading(false);
+    }
+  };
+
+  // Poll for updates WITHOUT showing loading spinner
+  const fetchMessagesPolling = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/messages`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data.success) {
+        setMessages(res.data.data.messages || []);
+        setDepartment(res.data.department || "");
+      }
+    } catch (err) {
+      console.error("Polling error:", err);
+      // Silently fail on polling
     }
   };
 
   useEffect(() => {
     if (!token) return;
-    fetchMessages();
+    fetchMessagesInitial();
   }, [token]);
 
   // Real-time updates with socket.io
@@ -58,11 +75,11 @@ export default function DepartmentDiscussion() {
     };
   }, [socket, department]);
 
-  // Polling as fallback for real-time updates (every 3 seconds)
+  // Polling as fallback (without loading state)
   useEffect(() => {
     if (!token) return;
 
-    const interval = setInterval(fetchMessages, 3000);
+    const interval = setInterval(fetchMessagesPolling, 3000);
     return () => clearInterval(interval);
   }, [token]);
 
@@ -133,7 +150,7 @@ export default function DepartmentDiscussion() {
         ref={scrollRef}
         className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50"
       >
-        {loading ? (
+        {initialLoading ? (
           <div className="flex justify-center py-8">
             <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
           </div>
@@ -147,7 +164,7 @@ export default function DepartmentDiscussion() {
             return (
               <div
                 key={msg._id}
-                className={`flex gap-2 ${isMe ? "flex-row-reverse justify-end" : "justify-start"}`}
+                className={`flex gap-2 ${isMe ? "flex-row-reverse" : ""}`}
               >
                 <div className="flex-shrink-0 mt-0.5">
                   {msg.userId?.profilePic ? (
