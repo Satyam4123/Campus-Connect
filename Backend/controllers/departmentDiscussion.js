@@ -1,5 +1,6 @@
 const DepartmentMessage = require("../models/DepartmentMessage");
 const User = require("../models/users");
+const { getIO } = require("../config/socket");
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
@@ -14,16 +15,19 @@ const getMessages = async (req, res) => {
     if (!user?.department) {
       return res.status(400).json({
         success: false,
-        message: "Your profile has no department set. Update your profile to join the discussion.",
+        message:
+          "Your profile has no department set. Update your profile to join the discussion.",
       });
     }
 
     const limit = Math.min(
       parseInt(req.query.limit, 10) || DEFAULT_LIMIT,
-      MAX_LIMIT
+      MAX_LIMIT,
     );
 
-    const messages = await DepartmentMessage.find({ department: user.department })
+    const messages = await DepartmentMessage.find({
+      department: user.department,
+    })
       .sort({ createdAt: -1 })
       .limit(limit)
       .populate("userId", "name profilePic")
@@ -52,11 +56,14 @@ const getMessages = async (req, res) => {
  */
 const createMessage = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select("department name profilePic");
+    const user = await User.findById(req.user._id).select(
+      "department name profilePic",
+    );
     if (!user?.department) {
       return res.status(400).json({
         success: false,
-        message: "Your profile has no department set. Update your profile to post.",
+        message:
+          "Your profile has no department set. Update your profile to post.",
       });
     }
 
@@ -78,6 +85,15 @@ const createMessage = async (req, res) => {
     const populated = await DepartmentMessage.findById(newMessage._id)
       .populate("userId", "name profilePic")
       .lean();
+
+    // Emit the new message to all users in that department's room via socket.io
+    try {
+      const io = getIO();
+      io.to(`department-${user.department}`).emit("new_message", populated);
+    } catch (error) {
+      console.error("Socket emission error:", error);
+      // Continue even if socket emission fails
+    }
 
     res.status(201).json({
       success: true,

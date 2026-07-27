@@ -5,7 +5,7 @@ let io;
 const socketConfig = (server) => {
   const allowedOrigins = [
     process.env.CLIENT_URL,
-    process.env.DEV_CLIENT_URL
+    process.env.DEV_CLIENT_URL,
   ].filter(Boolean);
 
   io = socketio(server, {
@@ -21,6 +21,14 @@ const socketConfig = (server) => {
 
     socket.on("setup", (userId) => {
       socket.join(userId.toString());
+    });
+
+    socket.on("join-department", (department) => {
+      socket.join(`department-${department}`);
+    });
+
+    socket.on("leave-department", (department) => {
+      socket.leave(`department-${department}`);
     });
 
     socket.on("disconnect", () => {
