@@ -105,9 +105,6 @@ export default function LoginPage() {
 
     const handleSignUpSubmit = async (e) => {
         e.preventDefault();
-        setSnackbarMessage("Account created successfully!");
-        setSnackbarSeverity("success");
-        setOpenSnackbar(true);
 
         try {
             const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/signup`, {
@@ -119,7 +116,7 @@ export default function LoginPage() {
             });
 
             if (response.data.success) {
-                setSnackbarMessage(response.data.message);
+                setSnackbarMessage("Account created successfully!");
                 setSnackbarSeverity("success");
                 setOpenSnackbar(true);
                 alert("Signup Successful! Please login");
@@ -275,8 +272,8 @@ export default function LoginPage() {
                                 <button
                                     onClick={() => handleTabChange(0)}
                                     className={`flex-1 py-3 px-6 rounded-md font-medium transition-all duration-300 ${tabValue === 0
-                                            ? 'bg-red-600 text-white shadow-lg'
-                                            : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                                        ? 'bg-red-600 text-white shadow-lg'
+                                        : 'text-gray-400 hover:text-white hover:bg-gray-700'
                                         }`}
                                 >
                                     Sign In
@@ -284,8 +281,8 @@ export default function LoginPage() {
                                 <button
                                     onClick={() => handleTabChange(1)}
                                     className={`flex-1 py-3 px-6 rounded-md font-medium transition-all duration-300 ${tabValue === 1
-                                            ? 'bg-red-600 text-white shadow-lg'
-                                            : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                                        ? 'bg-red-600 text-white shadow-lg'
+                                        : 'text-gray-400 hover:text-white hover:bg-gray-700'
                                         }`}
                                 >
                                     Sign Up
@@ -317,7 +314,7 @@ export default function LoginPage() {
                                         </div>
                                     </div>
 
-                                   
+
 
                                     <button
                                         onClick={handleLoginSubmit}
@@ -413,8 +410,8 @@ export default function LoginPage() {
             {openSnackbar && (
                 <div className="fixed bottom-6 right-6 z-50 animate-bounce">
                     <div className={`backdrop-blur-xl rounded-xl p-4 border shadow-2xl flex items-center space-x-3 ${snackbarSeverity === 'success'
-                            ? 'bg-green-900 bg-opacity-80 border-green-700 text-green-300'
-                            : 'bg-red-900 bg-opacity-80 border-red-700 text-red-300'
+                        ? 'bg-green-900 bg-opacity-80 border-green-700 text-green-300'
+                        : 'bg-red-900 bg-opacity-80 border-red-700 text-red-300'
                         }`}>
                         <div className={`w-2 h-2 rounded-full ${snackbarSeverity === 'success' ? 'bg-green-400' : 'bg-red-400'
                             } animate-pulse`}></div>
