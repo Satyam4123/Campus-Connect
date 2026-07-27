@@ -6,7 +6,7 @@ const express = require("express");
 const http = require("http");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
-const MongoStore = require("connect-mongo");
+const MongoStore = require("connect-mongo").default;
 const cors = require("cors");
 
 const { socketConfig } = require("../config/socket");
@@ -50,7 +50,7 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    store: MongoStore({
+    store: new MongoStore({
       mongoUrl: process.env.MONGO_URL,
     }),
     cookie: {
