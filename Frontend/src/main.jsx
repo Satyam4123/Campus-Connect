@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import axios from 'axios';
 import './index.css';
 import App from './App.jsx';
+import { SocketProvider } from './contexts/SocketContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter } from 'react-router-dom';
 
@@ -12,7 +13,9 @@ axios.defaults.withCredentials = true;
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <StrictMode>
-      <App />
+      <SocketProvider>
+        <App />
+      </SocketProvider>
     </StrictMode>
   </BrowserRouter>
 );
