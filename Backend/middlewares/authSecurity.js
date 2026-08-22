@@ -9,6 +9,9 @@ const authLimiter = rateLimit({
 });
 
 const captchaRequired = async (req, res, next) => {
+  // CAPTCHA is opt-in until the client sends a token.
+  if (process.env.CAPTCHA_ENABLED !== "true") return next();
+
   const threshold = Number(process.env.CAPTCHA_AFTER || 5);
   if (Number(req.rateLimit?.used || 0) <= threshold) return next();
   if (!process.env.CAPTCHA_SECRET || !req.body.captchaToken) {
@@ -30,12 +33,10 @@ const captchaRequired = async (req, res, next) => {
     );
     const result = await response.json();
     if (!result.success)
-      return res
-        .status(429)
-        .json({
-          success: false,
-          message: "Authentication request unavailable",
-        });
+      return res.status(429).json({
+        success: false,
+        message: "Authentication request unavailable",
+      });
     next();
   } catch {
     res

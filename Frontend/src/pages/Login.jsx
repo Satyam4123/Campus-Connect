@@ -6,6 +6,7 @@ export default function LoginPage() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [verificationToken, setVerificationToken] = useState("");
     const [department, setDepartment] = useState("");
     const [year, setYear] = useState("");
     const [tabValue, setTabValue] = useState(0);
@@ -15,6 +16,8 @@ export default function LoginPage() {
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [snackbarSeverity, setSnackbarSeverity] = useState("success");
     const [isLoggingIn, setIsLoggingIn] = useState(false);
+    const [isSigningUp, setIsSigningUp] = useState(false);
+    const [isVerifying, setIsVerifying] = useState(false);
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -104,6 +107,8 @@ export default function LoginPage() {
 
     const handleSignUpSubmit = async (e) => {
         e.preventDefault();
+        if (isSigningUp) return;
+        setIsSigningUp(true);
 
         try {
             const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/signup`, {
@@ -115,10 +120,9 @@ export default function LoginPage() {
             });
 
             if (response.data.success) {
-                setSnackbarMessage("Account created successfully!");
+                setSnackbarMessage("Check your email for the verification token.");
                 setSnackbarSeverity("success");
                 setOpenSnackbar(true);
-                alert("Signup Successful! Please login");
                 setTabValue(0);
                 setName("");
                 setEmail("");
@@ -140,6 +144,30 @@ export default function LoginPage() {
                 setSnackbarSeverity("error");
                 setOpenSnackbar(true);
             }
+        } finally {
+            setIsSigningUp(false);
+        }
+    };
+
+    const handleVerifyEmail = async (e) => {
+        e.preventDefault();
+        if (isVerifying) return;
+        setIsVerifying(true);
+
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/verify-email`, {
+                token: verificationToken.trim(),
+            });
+            setSnackbarMessage(response.data.message || "Email verified. You can now sign in.");
+            setSnackbarSeverity("success");
+            setOpenSnackbar(true);
+            setVerificationToken("");
+        } catch (error) {
+            setSnackbarMessage(error.response?.data?.message || "Verification failed. Please try again.");
+            setSnackbarSeverity("error");
+            setOpenSnackbar(true);
+        } finally {
+            setIsVerifying(false);
         }
     };
 
@@ -391,9 +419,10 @@ export default function LoginPage() {
 
                                     <button
                                         onClick={handleSignUpSubmit}
-                                        className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-red-500 hover:shadow-opacity-50"
+                                        disabled={isSigningUp}
+                                        className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg hover:shadow-red-500 hover:shadow-opacity-50"
                                     >
-                                        Create Account
+                                        {isSigningUp ? "Creating account..." : "Create Account"}
                                     </button>
 
                                     <p className="text-xs text-gray-500 text-center leading-tight">
@@ -401,6 +430,25 @@ export default function LoginPage() {
                                     </p>
                                 </div>
                             )}
+
+                            <form onSubmit={handleVerifyEmail} className="mt-6 border-t border-gray-700 pt-5 space-y-3">
+                                <p className="text-gray-400 text-xs text-center">Already signed up? Verify your email before signing in.</p>
+                                <input
+                                    type="text"
+                                    inputMode="text"
+                                    placeholder="Paste your email verification token"
+                                    value={verificationToken}
+                                    onChange={(e) => setVerificationToken(e.target.value)}
+                                    className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 px-3 py-2.5 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-all duration-300 text-sm"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={isVerifying || verificationToken.trim().length === 0}
+                                    className="w-full border border-gray-700 hover:border-red-500 text-gray-300 hover:text-white font-medium py-2.5 px-6 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isVerifying ? "Verifying..." : "Verify Email"}
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

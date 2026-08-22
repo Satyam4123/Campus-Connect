@@ -1,7 +1,6 @@
 # Campus-Connect
+
 A campus platform connecting students, faculty, and staff with essential resources and activities at MNNIT for streamlined communication and collaboration.
-
-
 
 # MERN Stack Project
 
@@ -20,7 +19,6 @@ This project is a full-stack web application built using the MERN (MongoDB, Expr
   - [4. Run the Application](#4-run-the-application)
 - [Accessing the Application](#accessing-the-application)
 
-
 ## Prerequisites
 
 Ensure the following software is installed on your system:
@@ -29,19 +27,21 @@ Ensure the following software is installed on your system:
 - [MongoDB](https://www.mongodb.com/) (running locally or available as a cloud instance)
 - [Git](https://git-scm.com/)
 
-
 Also, ensure that you have google API for authentication using OAuth set up by going in the google console.
 
 ## Installation
 
 ### 1. Clone the Repository
+
 First, clone the repository to your local machine:
 
 ```bash
 git clone <repository-url>
 cd <repository-name>
 ```
+
 ### 2. Install All Dependencies
+
 To install all dependencies for both the backend and frontend folders simultaneously, you can use the following commands:
 
 From the project root directory, run:
@@ -58,18 +58,28 @@ npm install
 ```
 
 ### 3. Set Up Environment Variables
+
 Create a .env file in the backend directory to store configuration for environment variables. Add the following keys:
 
 ```bash
-PORT=3000 
+PORT=3000
 MONGO_URL=<your-mongodb-connection-string>/mnnit
 JWT_SECRET=<your-jwt-secret-key>
 GOOGLE_CLIENT_ID=<your-google-client-id>
 GOOGLE_CLIENT_SECRET=<your-google-client-secret>
 SESSION_SECRET=<your-session-secret>
+CLIENT_URL=<your-deployed-frontend-url>
+GOOGLE_CALLBACK_URL=https://<your-render-service>.onrender.com/auth/google/callback
+# Optional: set to true only after the frontend sends a reCAPTCHA token
+CAPTCHA_ENABLED=false
 ```
 
+After normal signup, paste the verification token sent by email into the
+verification field on the login page before signing in. Google OAuth users are
+verified automatically.
+
 ### 4. Run the Application
+
 Start both the backend and frontend servers in separate terminals.
 
 Start the Backend Server
@@ -79,8 +89,8 @@ In the backend folder, start the server by running:
 cd backend
 npm start
 ```
-This will start the backend server at http://localhost:5000 (or your specified port).
 
+This will start the backend server at http://localhost:5000 (or your specified port).
 
 Start the Frontend Development Server
 In the frontend folder, start the React development server by running:
@@ -89,7 +99,9 @@ In the frontend folder, start the React development server by running:
 cd Frontend
 npm run dev
 ```
+
 ## Accessing the application
+
 This will start the frontend server at http://localhost:5173 by default.
 
 Accessing the Application
