@@ -21,6 +21,7 @@ const departmentDiscussionRoutes = require("../routes/departmentDiscussionRoutes
 
 const port = process.env.PORT || 3000;
 const app = express();
+app.set("trust proxy", 1);
 
 const allowedOrigins = [
   process.env.CLIENT_URL,
