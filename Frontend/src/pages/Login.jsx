@@ -72,6 +72,7 @@ export default function LoginPage() {
                 setSnackbarSeverity("success");
                 setOpenSnackbar(true);
 
+                localStorage.setItem('token', response.data.data.token);
                 localStorage.setItem('userId', response.data.data.userId);
                 localStorage.setItem('user', JSON.stringify({
                     name: response.data.data.name,
@@ -158,8 +159,8 @@ export default function LoginPage() {
             const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/verify-email`, {
                 token: verificationToken.trim(),
             });
-            setSnackbarMessage(response.data.message || "Email verified. You can now sign in.");
-            setSnackbarSeverity("success");
+            setSnackbarMessage(response.data.message || "Email verified successfully. Please sign in.");
+            setSnackbarSeverity(response.data.success ? "success" : "error");
             setOpenSnackbar(true);
             setVerificationToken("");
         } catch (error) {

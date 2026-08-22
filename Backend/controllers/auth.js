@@ -137,6 +137,7 @@ const login = async (req, res) => {
         userId: user._id,
         department: user.department,
         year: user.year,
+        token: jwtToken,
       },
     });
   } catch (error) {
@@ -159,7 +160,12 @@ const verifyEmail = async (req, res) => {
     user.emailVerificationTokenExpiry = null;
     await user.save();
   }
-  return res.status(200).json({ success: true, message: GENERIC_AUTH_MESSAGE });
+  return res.status(200).json({
+    success: Boolean(user),
+    message: user
+      ? "Email verified successfully. Please sign in."
+      : "Verification token is invalid or expired.",
+  });
 };
 
 const forgotPassword = async (req, res) => {
