@@ -11,7 +11,11 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, cb) => {
       try {
-        const email = profile.emails[0].value;
+        const providerEmail = profile.emails?.[0];
+        if (!providerEmail?.value || providerEmail.verified !== true) {
+          return cb(new Error("Google email is not verified"), null);
+        }
+        const email = providerEmail.value.toLowerCase();
 
         let user = await User.findOne({ email });
 
@@ -33,8 +37,8 @@ passport.use(
       } catch (err) {
         return cb(err, null);
       }
-    }
-  )
+    },
+  ),
 );
 
 passport.serializeUser((user, done) => {

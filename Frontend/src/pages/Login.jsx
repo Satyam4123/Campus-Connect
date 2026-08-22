@@ -69,7 +69,6 @@ export default function LoginPage() {
                 setSnackbarSeverity("success");
                 setOpenSnackbar(true);
 
-                localStorage.setItem('token', response.data.data.jwtToken);
                 localStorage.setItem('userId', response.data.data.userId);
                 localStorage.setItem('user', JSON.stringify({
                     name: response.data.data.name,

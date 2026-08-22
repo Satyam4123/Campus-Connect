@@ -4,7 +4,8 @@ const users = require("../models/users");
 const getToken = (req) => {
   const { authorization } = req.headers;
   if (authorization && authorization.startsWith("Bearer ")) {
-    return authorization.split(" ")[1];
+    const bearerToken = authorization.slice(7).trim();
+    if (bearerToken) return bearerToken;
   }
   return req.cookies?.token || null;
 };

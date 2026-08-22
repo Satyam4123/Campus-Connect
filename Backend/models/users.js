@@ -35,15 +35,20 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
-    otp: {
+    emailVerificationTokenHash: {
       type: String,
       default: null,
     },
 
-    otpExpiry: {
+    emailVerificationTokenExpiry: {
       type: Date,
       default: null,
     },
+
+    passwordResetTokenHash: { type: String, default: null },
+    passwordResetTokenExpiry: { type: Date, default: null },
+    failedLoginAttempts: { type: Number, default: 0 },
+    loginLockedUntil: { type: Date, default: null },
 
     department: {
       type: String,
@@ -53,7 +58,7 @@ const userSchema = new mongoose.Schema(
       type: Number,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("User", userSchema);

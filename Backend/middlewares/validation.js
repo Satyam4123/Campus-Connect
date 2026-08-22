@@ -81,4 +81,44 @@ const loginValidation = (req, res, next) => {
   next();
 };
 
-module.exports = { signupValidation, loginValidation };
+const recoveryValidation = (req, res, next) => {
+  const { error } = Joi.object({
+    email: Joi.string().email().lowercase().required(),
+  }).validate(req.body);
+  if (error)
+    return res
+      .status(400)
+      .json({ success: false, message: "Authentication request unavailable" });
+  next();
+};
+
+const resetValidation = (req, res, next) => {
+  const { error } = Joi.object({
+    token: Joi.string().hex().length(64).required(),
+    password: Joi.string().min(8).max(256).required(),
+  }).validate(req.body);
+  if (error)
+    return res
+      .status(400)
+      .json({ success: false, message: "Authentication request unavailable" });
+  next();
+};
+
+const tokenValidation = (req, res, next) => {
+  const { error } = Joi.object({
+    token: Joi.string().hex().length(64).required(),
+  }).validate(req.body);
+  if (error)
+    return res
+      .status(400)
+      .json({ success: false, message: "Authentication request unavailable" });
+  next();
+};
+
+module.exports = {
+  signupValidation,
+  loginValidation,
+  recoveryValidation,
+  resetValidation,
+  tokenValidation,
+};
