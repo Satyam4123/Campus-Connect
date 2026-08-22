@@ -38,6 +38,9 @@ export default function ProtectedRoute() {
     axios
       .get(`${API_URL}/auth/bootstrap`, {
         withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+        },
       })
       .then((res) => {
         if (!cancelled) finishBootstrap(res);

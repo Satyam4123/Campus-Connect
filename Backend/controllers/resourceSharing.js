@@ -48,20 +48,18 @@ const uploadResource = async (req, res) => {
       uploader: req.user._id,
     });
     await newResource.save();
-    res.status(200).json({ message: "Resource uploaded successfully" });
+    res.status(200).json({
+      message: "Resource uploaded successfully",
+      newResource,
+    });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error", error });
   }
 };
 
 const downloadResource = async (req, res) => {
-  const { uploader,filename } = req.params;
-  const filepath = path.join(
-    __dirname,
-    "../src/uploads",
-    uploader,
-    filename
-  );
+  const { uploader, filename } = req.params;
+  const filepath = path.join(__dirname, "../src/uploads", uploader, filename);
 
   try {
     const resource = await resources.findOne({ filename });
@@ -89,20 +87,20 @@ const downloadResource = async (req, res) => {
   }
 };
 
-const getCount=async(req, res)=>{
+const getCount = async (req, res) => {
   try {
-    const userId=req.params.userId
-    const count=await resources.countDocuments({uploader:userId});
-    res.status(200).json({count})
+    const userId = req.params.userId;
+    const count = await resources.countDocuments({ uploader: userId });
+    res.status(200).json({ count });
   } catch (error) {
-    res.status.json({error:"Server error"})
+    res.status.json({ error: "Server error" });
   }
-}
+};
 
 module.exports = {
   getResources,
   uploadResource,
   downloadResource,
   viewResource,
-  getCount
+  getCount,
 };
