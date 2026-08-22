@@ -11,9 +11,9 @@ const transporter = process.env.SMTP_HOST
 
 const sendAuthEmail = async ({ to, subject, text }) => {
   if (!transporter || !process.env.MAIL_FROM) {
-    if (process.env.NODE_ENV === "production")
-      throw new Error("Email service is not configured");
-    return;
+    throw new Error(
+      "Email service is not configured: SMTP_HOST and MAIL_FROM are required",
+    );
   }
   await transporter.sendMail({
     from: process.env.MAIL_FROM,

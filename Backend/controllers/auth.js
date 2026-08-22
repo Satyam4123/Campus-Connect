@@ -23,23 +23,42 @@ const signup = async (req, res) => {
   try {
     const { name, email, password, department, year } = req.body;
     const normalizedEmail = email.toLowerCase();
-    const user = await users.findOne({ email: normalizedEmail });
-    if (!user) {
-      const verificationToken = createToken();
-      const newUser = new users({
+    const existingUser = await users.findOne({ email: normalizedEmail });
+    if (existingUser?.isVerified) {
+      await delayResponse(startedAt);
+      return res
+        .status(202)
+        .json({ success: true, message: GENERIC_AUTH_MESSAGE });
+    }
+
+    const verificationToken = createToken();
+    const user =
+      existingUser ||
+      new users({
         name,
         email: normalizedEmail,
         password: await bcrypt.hash(password, PASSWORD_COST),
         department,
         year,
-        emailVerificationTokenHash: hashToken(verificationToken),
-        emailVerificationTokenExpiry: new Date(Date.now() + 60 * 60 * 1000),
       });
-      await newUser.save();
+
+    user.emailVerificationTokenHash = hashToken(verificationToken);
+    user.emailVerificationTokenExpiry = new Date(Date.now() + 60 * 60 * 1000);
+    await user.save();
+
+    try {
       await sendAuthEmail({
         to: normalizedEmail,
         subject: "Verify your Campus Connect email",
         text: `Use this verification token in the verification form: ${verificationToken}`,
+      });
+    } catch (error) {
+      console.error("Verification email delivery error:", error);
+      await delayResponse(startedAt);
+      return res.status(503).json({
+        success: false,
+        message:
+          "Unable to send the verification email. Please try again later.",
       });
     }
     await delayResponse(startedAt);
@@ -47,10 +66,12 @@ const signup = async (req, res) => {
       .status(202)
       .json({ success: true, message: GENERIC_AUTH_MESSAGE });
   } catch (error) {
+    console.error("Signup error:", error);
     await delayResponse(startedAt);
-    return res
-      .status(202)
-      .json({ success: true, message: GENERIC_AUTH_MESSAGE });
+    return res.status(500).json({
+      success: false,
+      message: "Unable to create the account. Please try again later.",
+    });
   }
 };
 
