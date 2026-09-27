@@ -75,7 +75,7 @@ app.use("/resources", resourcesRoutes);
 app.use("/department-discussion", departmentDiscussionRoutes);
 
 const server = http.createServer(app);
-const io = socketConfig(server);
+socketConfig(server);
 
 server.listen(port, () => {
   console.log(`Your app is listening at port ${port}`);
